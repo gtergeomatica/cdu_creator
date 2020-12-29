@@ -74,7 +74,7 @@ class CduCreator:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&CDU Creator')
+        self.menu = self.tr(u'&CDU Creator ISERNIA')
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -99,8 +99,8 @@ class CduCreator:
         self.algo_names = []
         self.cdu_path_folder = ''
         self.CduTitle = 'Certificato di Destinazione Urbanistica (CDU)'
-        self.CduComune = ''
-        self.input_logo_path = ''
+        self.CduComune = 'ISERNIA'
+        self.input_logo_path = QDir.toNativeSeparators(os.path.join(self.plugin_dir, 'logo_isernia.png'))
         self.checkAreaBox = False
         self.checkAreaPercBox = False
         self.root = ''
@@ -110,7 +110,7 @@ class CduCreator:
         self.protocollo = ''
         self.richiedente = ''
         self.data = QDate.currentDate()
-        self.checkDataBox = False
+        #self.checkDataBox = False
         self.sez_list = []
         self.fog_list = []
         self.map_list = []
@@ -212,10 +212,10 @@ class CduCreator:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/cdu_creator/icon.png'
+        icon_path = ':/plugins/cdu_creator_isernia/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'Create CDU'),
+            text=self.tr(u'Create CDU ISERNIA'),
             callback=self.pressIcon,
             parent=self.iface.mainWindow())
 
@@ -228,7 +228,7 @@ class CduCreator:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&CDU Creator'),
+                self.tr(u'&CDU Creator ISERNIA'),
                 action)
             self.iface.removeToolBarIcon(action)
             
@@ -246,9 +246,9 @@ class CduCreator:
                 self.cdu_path_folder = param[0].strip()
                 self.checkOdtBox = param[1].strip()
                 self.checkMapBox = param[2].strip()
-                self.CduTitle = param[3].strip()
-                self.CduComune = param[4].strip()
-                self.input_logo_path = param[5].strip()
+                #self.CduTitle = param[3].strip()
+                #self.CduComune = param[4].strip()
+                #self.input_logo_path = param[5].strip()
                 self.input_txt_path = param[6].strip()
                 self.checkAreaBox = param[7].strip()
                 self.checkAreaPercBox = param[8].strip()
@@ -265,9 +265,9 @@ class CduCreator:
                 else:
                     self.checkMapBox = False
                     self.dlg.mapCheckBox.setChecked(False)
-                self.dlg.titolo.setText(self.CduTitle)
-                self.dlg.nomeComune.setText(self.CduComune)
-                self.dlg.urlLogo.setText(self.input_logo_path)
+                #self.dlg.titolo.setText(self.CduTitle)
+                #self.dlg.nomeComune.setText(self.CduComune)
+                #self.dlg.urlLogo.setText(self.input_logo_path)
                 self.dlg.urlTxt.setText(self.input_txt_path)
                 if self.checkAreaBox == 'True':
                     self.checkAreaBox = True
@@ -303,17 +303,17 @@ class CduCreator:
                 self.dlg.fileImportButton.clicked.connect(self.importFile)
                 self.dlg.gruppoComboBox.currentIndexChanged.connect(self.gruppoBox)
                 self.dlg.algoComboBox.currentIndexChanged.connect(self.algoritmoBox)
-                self.dlg.logoButton.clicked.connect(self.importLogo)
-                self.dlg.urlLogo.textChanged.connect(self.handleLogo)
+                #self.dlg.logoButton.clicked.connect(self.importLogo)
+                #self.dlg.urlLogo.textChanged.connect(self.handleLogo)
                 self.dlg.txtButton.clicked.connect(self.importTxt)
                 self.dlg.urlTxt.textChanged.connect(self.handleTxt)
-                self.dlg.titolo.textChanged.connect(self.handleTitle)
-                self.dlg.nomeComune.textChanged.connect(self.handleComune)
+                #self.dlg.titolo.textChanged.connect(self.handleTitle)
+                #self.dlg.nomeComune.textChanged.connect(self.handleComune)
                 #self.dlg.textParticelle.textChanged.connect(self.handleParticelleText)
                 self.dlg.nameLineEdit.textChanged.connect(self.handleFileName)
                 self.dlg.protocolloLineEdit.textChanged.connect(self.handleProtocollo)
                 self.dlg.richiedenteEdit.textChanged.connect(self.handleRichiedente)
-                self.dlg.DataCheckBox.stateChanged.connect(self.handleDataCheck)
+                #self.dlg.DataCheckBox.stateChanged.connect(self.handleDataCheck)
                 self.dlg.dateEdit.setDate(QDate.currentDate())
                 #self.dlg.printAreaBox.setText("m<sup>2</sup>")
                 #self.dlg.dateEdit.setDate(QDate(2019, 9, 13))
@@ -701,7 +701,7 @@ class CduCreator:
     def handleRichiedente(self, val):
         self.richiedente = val
         
-    def handleDataCheck(self):
+    """ def handleDataCheck(self):
         if self.dlg.DataCheckBox.isChecked() == True:
             self.checkDataBox = True
             self.dlg.label_11.setEnabled(True)
@@ -709,7 +709,7 @@ class CduCreator:
         else:
             self.checkDataBox = False
             self.dlg.label_11.setEnabled(False)
-            self.dlg.dateEdit.setEnabled(False)
+            self.dlg.dateEdit.setEnabled(False) """
             
     def handleRemoveButton(self):
         if str(self.dlg.textParticelle.toPlainText()) != '':
@@ -746,25 +746,25 @@ class CduCreator:
         else:
             self.checkMapBox = False
         
-    def handleTitle(self, val):
+    """ def handleTitle(self, val):
         self.CduTitle = val
-        print(self.CduTitle)
+        print(self.CduTitle) """
         
-    def handleComune(self, val):
+    """ def handleComune(self, val):
         self.CduComune = val
-        print(self.CduComune)
+        print(self.CduComune) """
         
-    def importLogo(self):
+    """ def importLogo(self):
         self.input_logo, _filter = QFileDialog.getOpenFileName(None, "Open ", '.', "(*.png *.jpg)")
         print (self.input_logo)
         self.input_logo_path = QDir.toNativeSeparators(self.input_logo)
         #print (self.input_logo)
         print (self.input_logo_path)
-        input_logo_txt = self.dlg.urlLogo.setText(self.input_logo_path)
+        input_logo_txt = self.dlg.urlLogo.setText(self.input_logo_path) """
         
-    def handleLogo(self, val):
+    """ def handleLogo(self, val):
         self.input_logo_path = val
-        print(self.input_logo_path)
+        print(self.input_logo_path) """
         
     def importFile(self):
         self.input_file, _filter = QFileDialog.getOpenFileName(None, "Open ", '.', "(*.txt *.csv)")
@@ -870,7 +870,7 @@ class CduCreator:
         #self.dlg.algoComboBox.addItem('')
         self.dlg.algoComboBox.addItems(alg for alg in self.algo_names)
         
-        self.dlg.titolo.setText(self.CduTitle)
+        #self.dlg.titolo.setText(self.CduTitle)
         
         
     def closePlugin(self):
@@ -889,17 +889,17 @@ class CduCreator:
         self.dlg.fileImportButton.clicked.disconnect(self.importFile)
         self.dlg.gruppoComboBox.currentIndexChanged.disconnect(self.gruppoBox)
         self.dlg.algoComboBox.currentIndexChanged.disconnect(self.algoritmoBox)
-        self.dlg.logoButton.clicked.disconnect(self.importLogo)
-        self.dlg.urlLogo.textChanged.disconnect(self.handleLogo)
+        #self.dlg.logoButton.clicked.disconnect(self.importLogo)
+        #self.dlg.urlLogo.textChanged.disconnect(self.handleLogo)
         self.dlg.txtButton.clicked.disconnect(self.importTxt)
         self.dlg.urlTxt.textChanged.disconnect(self.handleTxt)
-        self.dlg.titolo.textChanged.disconnect(self.handleTitle)
-        self.dlg.nomeComune.textChanged.disconnect(self.handleComune)
+        #self.dlg.titolo.textChanged.disconnect(self.handleTitle)
+        #self.dlg.nomeComune.textChanged.disconnect(self.handleComune)
         #self.dlg.textParticelle.textChanged.disconnect(self.handleParticelleText)
         self.dlg.nameLineEdit.textChanged.disconnect(self.handleFileName)
         self.dlg.protocolloLineEdit.textChanged.disconnect(self.handleProtocollo)
         self.dlg.richiedenteEdit.textChanged.disconnect(self.handleRichiedente)
-        self.dlg.DataCheckBox.stateChanged.disconnect(self.handleDataCheck)
+        #self.dlg.DataCheckBox.stateChanged.disconnect(self.handleDataCheck)
         self.dlg.textParticelle.textChanged.disconnect(self.handleRemoveButton)
         self.dlg.dateEdit.dateChanged.connect(self.handleData)
         self.dlg.printAreaBox.stateChanged.disconnect(self.handleAreaBox)
@@ -930,8 +930,8 @@ class CduCreator:
         self.algo_names = []
         self.cdu_path_folder = ''
         self.CduTitle = 'Certificato di Destinazione Urbanistica (CDU)'
-        self.CduComune = ''
-        self.input_logo_path = ''
+        self.CduComune = 'ISERNIA'
+        self.input_logo_path = QDir.toNativeSeparators(os.path.join(self.plugin_dir, 'logo_isernia.png'))
         self.checkAreaBox = False
         self.checkAreaPercBox = False
         self.root = ''
@@ -941,7 +941,7 @@ class CduCreator:
         self.protocollo = ''
         self.richiedente = ''
         self.data = QDate.currentDate()
-        self.checkDataBox = False
+        #self.checkDataBox = False
         self.sez_list = []
         self.fog_list = []
         self.map_list = []
@@ -965,6 +965,14 @@ class CduCreator:
         
         if self.gruppoIndex == 0:
             self.dlg.textLog.append(self.tr('ATTENZIONE: nessun gruppo è stato selezionato, selezionare il gruppo contenete i dati urbanistici\n'))
+            return
+
+        if self.protocollo == '':
+            self.dlg.textLog.append(self.tr('ERRORE: non è stato specificato il numero di protocollo\n'))
+            return
+
+        if self.richiedente == '':
+            self.dlg.textLog.append(self.tr('ERRORE: non è stato specificato il nome del richiedente\n'))
             return
             
         if self.cdu_path_folder == '':
@@ -1342,29 +1350,19 @@ class CduCreator:
                 else:
                     self.dlg.textLog.append(self.tr('ATTENZIONE: il file {} non è stato trovato, il Logo non verrà stampato.\n'.format(self.input_logo_path)))
                     QCoreApplication.processEvents()
-            stringa += '<h2 style="text-align:center">' + self.CduTitle + ' - Comune di ' + self.CduComune + '</h2>'
-            stringa += '<hr><br>'
-            if self.protocollo == '':
-                stringa += '<p>Prot. n°<br>'
-            else:
-                stringa += '<p>Prot. n° ' + self.protocollo + '<br>'
-            if self.checkDataBox == False:
-                stringa += 'Lì, </p>'
-            else:
-                stringa += 'Lì, ' + self.data.toString( Qt.DefaultLocaleShortDate) + '</p>'
-            stringa += '<h3 style="text-align:center">Il Responsabile del Servizio</h3>'
-            if self.richiedente == '':
-                stringa += '<p>Vista la richiesta del _______________________________________________________________________ <br><br>'
-            else:
-                stringa += '<p>Vista la richiesta del <i>' + self.richiedente + ' </i>'
-            if self.checkDataBox == False:
-                stringa += 'presentata in data ____/____/____ '
-            else:
-                stringa += 'presentata in data <i>' + self.data.toString( Qt.DefaultLocaleShortDate) + '  </i>'
-            if self.protocollo == '':
-                stringa += 'prot. n. ________;<br></p>'
-            else:
-                stringa += 'prot. n. <i>' + self.protocollo + '</i>;<br></p>'
+            stringa += '<h2 style="text-align:center"><i>COMUNE DI ' + self.CduComune + '</i></h2>'
+            stringa += '<h4 style="text-align:center"><i>(Medaglia d\'Oro)</i></h4>'
+            stringa += '<h3 style="text-align:center"><i><b>Settore III</i></h3>'
+            stringa += '<hr>'
+            stringa += '<p><i>Prot. n° ' + self.protocollo + '</i></p>'
+            stringa += '<p><i>8° Servizio Urbanistica</i></p>'
+            stringa += '<hr>'
+            stringa += '<p align="center"><b>' + self.CduTitle + '<br>(art. 30, comma 3, D.P.R.06/06/2001 n. 380 T.U. Edilizia)</b></p>'
+            stringa += '<p align="center"><i><b>Il Dirigente III Settore</b></i></p>'
+            stringa += '<p><b>VISTA</b> l\'istanza del/della sig./sig.ra <b>' + self.richiedente + ' </b>'
+            stringa += 'prot. n. <i>' + self.protocollo + '</i> '
+            stringa += 'acquisito il <i>' + self.data.toString( Qt.DefaultLocaleShortDate) + '  </i>,'
+            stringa +='tendente ad ottenere il rilascio di un certificato di destinazione urbanistica relativo ai terreni catastalmente individuati come segue:</p>'
             if self.input_txt_path != '':
                 if os.path.isfile(self.input_txt_path):
                     txt_file = open(self.input_txt_path, "r")

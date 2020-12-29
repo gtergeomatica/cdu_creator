@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/cdu_creator" >
+    <qresource prefix="/plugins/cdu_creator_isernia" >
         <file>icon.png</file>
     </qresource>
 </RCC>
