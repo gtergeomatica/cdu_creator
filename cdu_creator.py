@@ -92,6 +92,7 @@ class CduCreator:
         self.foglio_values = []
         self.sezione_values = []
         self.gruppoIndex = 0
+        self.gruppoParamIndex = ''
         self.algoritmoIndex = 0
         self.out_tempdir_s = ''
         self.lyr = ''
@@ -246,12 +247,13 @@ class CduCreator:
                 self.cdu_path_folder = param[0].strip()
                 self.checkOdtBox = param[1].strip()
                 self.checkMapBox = param[2].strip()
+                self.gruppoParamIndex = param[3].strip()
                 #self.CduTitle = param[3].strip()
                 #self.CduComune = param[4].strip()
                 #self.input_logo_path = param[5].strip()
-                self.input_txt_path = param[6].strip()
-                self.checkAreaBox = param[7].strip()
-                self.checkAreaPercBox = param[8].strip()
+                self.input_txt_path = param[4].strip()
+                self.checkAreaBox = param[5].strip()
+                self.checkAreaPercBox = param[6].strip()
                 self.dlg.OutFolder.setText(self.cdu_path_folder)
                 if self.checkOdtBox == 'True':
                     self.checkOdtBox = True
@@ -265,6 +267,8 @@ class CduCreator:
                 else:
                     self.checkMapBox = False
                     self.dlg.mapCheckBox.setChecked(False)
+                #self.dlg.gruppoComboBox.setCurrentIndex(int(self.gruppoIndex))
+                print('groupindex = {}'.format(self.gruppoIndex))
                 #self.dlg.titolo.setText(self.CduTitle)
                 #self.dlg.nomeComune.setText(self.CduComune)
                 #self.dlg.urlLogo.setText(self.input_logo_path)
@@ -848,7 +852,7 @@ class CduCreator:
         webbrowser.open('https://manuale-cdu-creator.readthedocs.io/it/latest/')
         
     def prepRun(self):
-    
+        print('in preprun groupindex = {}'.format(self.gruppoIndex))
         self.popComboSezione()
         self.popComboFoglio()
         
@@ -862,8 +866,13 @@ class CduCreator:
                 self.group_names.append(ch.name())
                 
         self.dlg.gruppoComboBox.clear()
+        print('in preprun groupindex = {}'.format(self.gruppoIndex))
         self.dlg.gruppoComboBox.addItem('')
         self.dlg.gruppoComboBox.addItems(gro for gro in self.group_names)
+        print('in preprun groupindex = {}'.format(self.gruppoIndex))
+        self.dlg.gruppoComboBox.setCurrentIndex(int(self.gruppoParamIndex))
+        print('in preprun groupindex = {}'.format(self.gruppoIndex))
+        
         
         self.algo_names = ['QGIS - Ritaglia', 'GDAL - Ritaglia con maschera']
         self.dlg.algoComboBox.clear()
@@ -923,6 +932,7 @@ class CduCreator:
         self.foglio_values = []
         self.sezione_values = []
         self.gruppoIndex = 0
+        self.gruppoParamIndex = ''
         self.algoritmoIndex = 0
         self.out_tempdir_s = ''
         self.lyr = ''
@@ -996,9 +1006,10 @@ class CduCreator:
         param_file.write(self.cdu_path_folder + '\n')
         param_file.write(str(self.checkOdtBox) + '\n')
         param_file.write(str(self.checkMapBox) + '\n')
-        param_file.write(self.CduTitle + '\n')
-        param_file.write(self.CduComune + '\n')
-        param_file.write(self.input_logo_path + '\n')
+        param_file.write(str(self.gruppoIndex) + '\n')
+        #param_file.write(self.CduTitle + '\n')
+        #param_file.write(self.CduComune + '\n')
+        #param_file.write(self.input_logo_path + '\n')
         param_file.write(self.input_txt_path + '\n')
         param_file.write(str(self.checkAreaBox) + '\n')
         param_file.write(str(self.checkAreaPercBox) + '\n')
@@ -1063,6 +1074,7 @@ class CduCreator:
             temp_feat = []
             temp_feat_name = 0
             temp_dict = {}
+            fog_map_dict = {}
             dict_to_print = {}
             msg_nome_check = 0
             msg_descr_check = 0
@@ -1087,11 +1099,12 @@ class CduCreator:
                 #print('il foglio è {}'.format(sel_foglio))
                 sel_particella = ii[self.map_list[0].casefold()]
                 map_sel_list.append(sel_particella)
+                fog_map_dict.setdefault(sel_foglio, []).append(sel_particella) 
                 #print('il mappale è {}'.format(sel_particella))
                 if sel_sezione == NULL or sel_sezione == '' or sel_sezione == '-' or sel_sezione == 'NULL':
-                    stringa_cat = '<p> Il terreno oggetto della richiesta e distinto in Catasto al foglio <b>' + sel_foglio + '</b> con il mappale <b>' + sel_particella + '</b> interseca le seguenti mappe del <b>' + selectedGroup + '</b>:<br></p>'
+                    stringa_cat = '<p><b> F. ' + sel_foglio + ', P.lla' + sel_particella + ';</b></p>'
                 else:
-                    stringa_cat = '<p> Il terreno oggetto della richiesta e distinto in Catasto alla sezione <b>' + sel_sezione + '</b> e al foglio <b>' + sel_foglio + '</b> con il mappale <b>' + sel_particella + '</b> interseca le seguenti mappe del <b>' + selectedGroup + '</b>:<br></p>'
+                    stringa_cat = '<p><b> S. ' + sel_sezione + ', F. ' + sel_foglio + ', P.lla ' + sel_particella + ';</b></p>'
 
                 #salva la singola feat selezionata in un memory layer e lo aggiunge al gruppo (necessario per il clip)
                 vl = QgsVectorLayer("Polygon?crs={}".format(self.lyr.crs().authid()), "temporary_feat{}".format(temp_feat_name), "memory")
@@ -1299,10 +1312,11 @@ class CduCreator:
                             QCoreApplication.processEvents()
 
                     for key_td, value_td in temp_dict.items():
-                        #print('questa è la chiave: {}'.format(key_pl))
-                        #print('questa è il valore: {}'.format(value_pl))
+                        #print('questa è la chiave: {}'.format(key_td))
+                        print('questa è il valore: {}'.format(value_td))
                         text = ''
                         for ktd, vtd in value_td.items():
+                            print(ktd)
                             if self.checkAreaBox == True and self.checkAreaPercBox == True:
                                 text += '<p><b>' + vtd[0] + '</b><br>' + vtd[1] + '<br>' + vtd[2] + '<br>' + vtd[3] + '<br>' + vtd[4] + '<br>' + vtd[5] + '<br>' + vtd[6] +'<br><br></p>'
                             elif self.checkAreaBox == True and self.checkAreaPercBox == False:
@@ -1322,6 +1336,7 @@ class CduCreator:
                         QCoreApplication.processEvents()
             
             self.lyr.removeSelection()
+            print(fog_map_dict)
 
             #crea la printer per stampare il pdf
             printer = QPrinter()
@@ -1330,7 +1345,7 @@ class CduCreator:
             printer.setFullPage(True)
             printer.setOutputFormat(QPrinter.PdfFormat)
             if self.cdu_file_name == '':
-                cdu_pdf_name = 'cdu_{}.pdf'.format(datetime.now().strftime("%d%m%Y_%H%M%S"))
+                cdu_pdf_name = '{}_f{}_prg2000.pdf'.format(self.richiedente, '-'.join([f for f in sorted(set(fog_sel_list))]))
             else:
                 cdu_pdf_name = '{}.pdf'.format(self.cdu_file_name)
             #print('il nome file è {}'.format(cdu_pdf_name))
@@ -1363,6 +1378,16 @@ class CduCreator:
             stringa += 'prot. n. <i>' + self.protocollo + '</i> '
             stringa += 'acquisito il <i>' + self.data.toString( Qt.DefaultLocaleShortDate) + '  </i>,'
             stringa +='tendente ad ottenere il rilascio di un certificato di destinazione urbanistica relativo ai terreni catastalmente individuati come segue:</p>'
+            for kf, vm in fog_map_dict.items():
+                if len(vm) > 1:
+                    stringa += '<b>F. {}, P.lle {};</b><br>'.format(kf, '-'.join([v for v in vm]))
+                else:
+                     stringa += '<b>F. {}, P.lla {};</b><br>'.format(kf, '-'.join([v for v in vm]))
+            stringa += '<p><b>FATTI ASSUMERE</b> i dovuti accertamenti dall’8° Servizio Urbanistica;<br><br>'
+            stringa += '<b>VISTI</b> gli elaborati della Variante Generale al P.R.G. adottati con Delibera di Consiglio Comunale n. 49 del 05 giugno 2001 ed approvata con Delibera di Consiglio Regionale n. 179 del 07 settembre 2004;<br><br>'
+            stringa += '<b>VISTI</b> gli atti del settore e le mappe in possesso dello stesso;<br><br>'
+            stringa += '<b>VISTO</b> l’art. 30 del DPR n. 380/2001 - Testo Unico sull’Edilizia;</p>'
+
             if self.input_txt_path != '':
                 if os.path.isfile(self.input_txt_path):
                     txt_file = open(self.input_txt_path, "r")
@@ -1373,7 +1398,7 @@ class CduCreator:
                 else:
                     self.dlg.textLog.append(self.tr('ATTENZIONE: il file TXT {} non è stato trovato, il Testo non verrà stampato.\n'.format(self.input_txt_path)))
                     QCoreApplication.processEvents()
-            stringa += '<h3 style="text-align:center">Attesta e Certifica che</h3>'
+            stringa += '<h3 style="text-align:center">CERTIFICA CHE</h3>'
             
             
             for key_dtp, value_dtp in dict_to_print.items():
