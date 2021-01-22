@@ -101,12 +101,15 @@ class CduCreator:
         self.cdu_path_folder = ''
         self.CduTitle = 'Certificato di Destinazione Urbanistica (CDU)'
         self.CduComune = 'ISERNIA'
+        self.CduTecnico = ''
+        self.CduDirigente = ''
         self.input_logo_path = QDir.toNativeSeparators(os.path.join(self.plugin_dir, 'logo_isernia.png'))
         self.checkAreaBox = False
         self.checkAreaPercBox = False
         self.root = ''
         self.input_file_path = ''
         self.input_txt_path = ''
+        self.input_txt_path2 = ''
         self.cdu_file_name = ''
         self.protocollo = ''
         self.richiedente = ''
@@ -116,7 +119,7 @@ class CduCreator:
         self.fog_list = []
         self.map_list = []
         self.catasto_alias = {}
-        self.checkOdtBox = False
+        self.checkPdfBox = False
         self.checkMapBox = False 
         
 
@@ -245,7 +248,7 @@ class CduCreator:
                 param_file = open(self.param_txt, "r")
                 param = param_file.readlines()
                 self.cdu_path_folder = param[0].strip()
-                self.checkOdtBox = param[1].strip()
+                self.checkPdfBox = param[1].strip()
                 self.checkMapBox = param[2].strip()
                 self.gruppoParamIndex = param[3].strip()
                 #self.CduTitle = param[3].strip()
@@ -254,13 +257,15 @@ class CduCreator:
                 self.input_txt_path = param[4].strip()
                 self.checkAreaBox = param[5].strip()
                 self.checkAreaPercBox = param[6].strip()
+                self.CduTecnico = param[7].strip()
+                self.CduDirigente = param[8].strip()
                 self.dlg.OutFolder.setText(self.cdu_path_folder)
-                if self.checkOdtBox == 'True':
-                    self.checkOdtBox = True
-                    self.dlg.odtCheckBox.setChecked(True)
+                if self.checkPdfBox == 'True':
+                    self.checkPdfBox = True
+                    self.dlg.pdfCheckBox.setChecked(True)
                 else:
-                    self.checkOdtBox = False
-                    self.dlg.odtCheckBox.setChecked(False)
+                    self.checkPdfBox = False
+                    self.dlg.pdfCheckBox.setChecked(False)
                 if self.checkMapBox == 'True':
                     self.checkMapBox = True
                     self.dlg.mapCheckBox.setChecked(True)
@@ -271,6 +276,8 @@ class CduCreator:
                 print('groupindex = {}'.format(self.gruppoIndex))
                 #self.dlg.titolo.setText(self.CduTitle)
                 #self.dlg.nomeComune.setText(self.CduComune)
+                self.dlg.tecnicoEdit.setText(self.CduTecnico)
+                self.dlg.dirigenteEdit.setText(self.CduDirigente)
                 #self.dlg.urlLogo.setText(self.input_logo_path)
                 self.dlg.urlTxt.setText(self.input_txt_path)
                 if self.checkAreaBox == 'True':
@@ -311,8 +318,12 @@ class CduCreator:
                 #self.dlg.urlLogo.textChanged.connect(self.handleLogo)
                 self.dlg.txtButton.clicked.connect(self.importTxt)
                 self.dlg.urlTxt.textChanged.connect(self.handleTxt)
+                self.dlg.txtButton_2.clicked.connect(self.importTxt2)
+                self.dlg.urlTxt_2.textChanged.connect(self.handleTxt2)
                 #self.dlg.titolo.textChanged.connect(self.handleTitle)
                 #self.dlg.nomeComune.textChanged.connect(self.handleComune)
+                self.dlg.tecnicoEdit.textChanged.connect(self.handleTecnico)
+                self.dlg.dirigenteEdit.textChanged.connect(self.handleDirigente)
                 #self.dlg.textParticelle.textChanged.connect(self.handleParticelleText)
                 self.dlg.nameLineEdit.textChanged.connect(self.handleFileName)
                 self.dlg.protocolloLineEdit.textChanged.connect(self.handleProtocollo)
@@ -325,7 +336,7 @@ class CduCreator:
                 self.dlg.textParticelle.textChanged.connect(self.handleRemoveButton)
                 self.dlg.printAreaBox.stateChanged.connect(self.handleAreaBox)
                 self.dlg.printAreaPercBox.stateChanged.connect(self.handleAreaPercBox)
-                self.dlg.odtCheckBox.stateChanged.connect(self.handleOdtFile)
+                self.dlg.pdfCheckBox.stateChanged.connect(self.handlePdfFile)
                 self.dlg.mapCheckBox.stateChanged.connect(self.handleMapFile)
                 self.dlg.addButton.clicked.connect(self.addMapButton)
                 self.dlg.removeButton.clicked.connect(self.removeMapButton)
@@ -738,11 +749,11 @@ class CduCreator:
     def handleFileName(self, val):
         self.cdu_file_name = val
         
-    def handleOdtFile(self):
-        if self.dlg.odtCheckBox.isChecked() == True:
-            self.checkOdtBox = True
+    def handlePdfFile(self):
+        if self.dlg.pdfCheckBox.isChecked() == True:
+            self.checkPdfBox = True
         else:
-            self.checkOdtBox = False
+            self.checkPdfBox = False
             
     def handleMapFile(self):
         if self.dlg.mapCheckBox.isChecked() == True:
@@ -757,6 +768,12 @@ class CduCreator:
     """ def handleComune(self, val):
         self.CduComune = val
         print(self.CduComune) """
+
+    def handleTecnico(self, val):
+        self.CduTecnico = val
+
+    def handleDirigente(self, val):
+        self.CduDirigente = val
         
     """ def importLogo(self):
         self.input_logo, _filter = QFileDialog.getOpenFileName(None, "Open ", '.', "(*.png *.jpg)")
@@ -824,10 +841,19 @@ class CduCreator:
         self.input_txt, _filter = QFileDialog.getOpenFileName(None, "Open ", '.', "(*.txt)")
         self.input_txt_path = QDir.toNativeSeparators(self.input_txt)
         input_txt_txt = self.dlg.urlTxt.setText(self.input_txt_path)
+
+    def importTxt2(self):
+        self.input_txt2, _filter = QFileDialog.getOpenFileName(None, "Open ", '.', "(*.txt)")
+        self.input_txt_path2 = QDir.toNativeSeparators(self.input_txt2)
+        input_txt_txt2 = self.dlg.urlTxt_2.setText(self.input_txt_path2)
         
     def handleTxt(self, val):
         self.input_txt_path = val
         print(self.input_txt_path)
+
+    def handleTxt2(self, val):
+        self.input_txt_path2 = val
+        print(self.input_txt_path2)
 
     def handleAreaBox(self):
         if self.dlg.printAreaBox.isChecked() == True:
@@ -902,8 +928,12 @@ class CduCreator:
         #self.dlg.urlLogo.textChanged.disconnect(self.handleLogo)
         self.dlg.txtButton.clicked.disconnect(self.importTxt)
         self.dlg.urlTxt.textChanged.disconnect(self.handleTxt)
+        self.dlg.txtButton_2.clicked.disconnect(self.importTxt2)
+        self.dlg.urlTxt_2.textChanged.disconnect(self.handleTxt2)
         #self.dlg.titolo.textChanged.disconnect(self.handleTitle)
         #self.dlg.nomeComune.textChanged.disconnect(self.handleComune)
+        self.dlg.tecnicoEdit.textChanged.disconnect(self.handleTecnico)
+        self.dlg.dirigenteEdit.textChanged.disconnect(self.handleDirigente)
         #self.dlg.textParticelle.textChanged.disconnect(self.handleParticelleText)
         self.dlg.nameLineEdit.textChanged.disconnect(self.handleFileName)
         self.dlg.protocolloLineEdit.textChanged.disconnect(self.handleProtocollo)
@@ -913,7 +943,7 @@ class CduCreator:
         self.dlg.dateEdit.dateChanged.connect(self.handleData)
         self.dlg.printAreaBox.stateChanged.disconnect(self.handleAreaBox)
         self.dlg.printAreaPercBox.stateChanged.disconnect(self.handleAreaPercBox)
-        self.dlg.odtCheckBox.stateChanged.disconnect(self.handleOdtFile)
+        self.dlg.pdfCheckBox.stateChanged.disconnect(self.handlePdfFile)
         self.dlg.mapCheckBox.stateChanged.disconnect(self.handleMapFile)
         self.dlg.addButton.clicked.disconnect(self.addMapButton)
         self.dlg.removeButton.clicked.disconnect(self.removeMapButton)
@@ -941,12 +971,15 @@ class CduCreator:
         self.cdu_path_folder = ''
         self.CduTitle = 'Certificato di Destinazione Urbanistica (CDU)'
         self.CduComune = 'ISERNIA'
+        self.CduTecnico = ''
+        self.CduDirigente = ''
         self.input_logo_path = QDir.toNativeSeparators(os.path.join(self.plugin_dir, 'logo_isernia.png'))
         self.checkAreaBox = False
         self.checkAreaPercBox = False
         self.root = ''
         self.input_file_path = ''
         self.input_txt_path = ''
+        self.input_txt_path2 = ''
         self.cdu_file_name = ''
         self.protocollo = ''
         self.richiedente = ''
@@ -956,7 +989,7 @@ class CduCreator:
         self.fog_list = []
         self.map_list = []
         self.catasto_alias = {}
-        self.checkOdtBox = False
+        self.checkPdfBox = False
         self.checkMapBox = False 
         
         if self.out_tempdir_s != '':
@@ -1004,7 +1037,7 @@ class CduCreator:
             
         param_file = open(self.param_txt, "w")
         param_file.write(self.cdu_path_folder + '\n')
-        param_file.write(str(self.checkOdtBox) + '\n')
+        param_file.write(str(self.checkPdfBox) + '\n')
         param_file.write(str(self.checkMapBox) + '\n')
         param_file.write(str(self.gruppoIndex) + '\n')
         #param_file.write(self.CduTitle + '\n')
@@ -1013,6 +1046,8 @@ class CduCreator:
         param_file.write(self.input_txt_path + '\n')
         param_file.write(str(self.checkAreaBox) + '\n')
         param_file.write(str(self.checkAreaPercBox) + '\n')
+        param_file.write(self.CduTecnico + '\n')
+        param_file.write(self.CduDirigente + '\n')
         param_file.close()
 
         result = True
@@ -1102,9 +1137,9 @@ class CduCreator:
                 fog_map_dict.setdefault(sel_foglio, []).append(sel_particella) 
                 #print('il mappale è {}'.format(sel_particella))
                 if sel_sezione == NULL or sel_sezione == '' or sel_sezione == '-' or sel_sezione == 'NULL':
-                    stringa_cat = '<p><b> F. ' + sel_foglio + ', P.lla' + sel_particella + ';</b></p>'
+                    stringa_cat = '<br><b> F. ' + sel_foglio + ', P.lla' + sel_particella + '</b>'
                 else:
-                    stringa_cat = '<p><b> S. ' + sel_sezione + ', F. ' + sel_foglio + ', P.lla ' + sel_particella + ';</b></p>'
+                    stringa_cat = '<br><b> S. ' + sel_sezione + ', F. ' + sel_foglio + ', P.lla ' + sel_particella + '</b>'
 
                 #salva la singola feat selezionata in un memory layer e lo aggiunge al gruppo (necessario per il clip)
                 vl = QgsVectorLayer("Polygon?crs={}".format(self.lyr.crs().authid()), "temporary_feat{}".format(temp_feat_name), "memory")
@@ -1206,10 +1241,13 @@ class CduCreator:
                         nome_list = []
                         rif_list = []
                         art_list = []
+                        testo_list = []
+                        articoli = {}
                         descr_check = 0
                         nome_check = 0
                         rif_check = 0
                         art_check = 0
+                        testo_check = 0
                         for keys, values in alias.items():
                             if values.casefold() == 'descrizione'.casefold() or keys.casefold() == 'descrizione'.casefold():
                                 descr_list.insert(0, keys)
@@ -1223,10 +1261,12 @@ class CduCreator:
                             if values.casefold() == 'articolo'.casefold() or keys.casefold() == 'articolo'.casefold():
                                 art_list.insert(0, keys)
                                 art_check += 1
+                            if values.casefold() == 'testo'.casefold() or keys.casefold() == 'testo'.casefold():
+                                testo_list.insert(0, keys)
+                                testo_check += 1
 
                         sel_lyr_int = QgsProject.instance().mapLayersByName(layers_dict[key][2])
-                        
-                        
+                        print('testo exist {}'.format(testo_check))
                         for fl in sel_lyr_int[0].getFeatures():
                             if sel_lyr_int[0].featureCount() > 0:
                                 #print('ci sono features')
@@ -1235,42 +1275,48 @@ class CduCreator:
                                 area = fl.geometry().area()
                                 area_perc = area * 100 / area_sel
                                 if descr_check == 1:
-                                    descr = '- Descrizione: {}'.format(fl[descr_list[0]])
+                                    descr = '{}'.format(fl[descr_list[0]])
                                     if fl[descr_list[0]] == NULL:
-                                        descr = '- Descrizione: -'
+                                        descr = ''
                                 else:
-                                    descr = '- Descrizione: -'
+                                    descr = ''
                                 if nome_check == 1:
-                                    nome = '- Nome: {}'.format(fl[nome_list[0]])
+                                    nome = '{}'.format(fl[nome_list[0]])
                                     if fl[nome_list[0]] == NULL:
-                                        nome = '- Nome: -'
+                                        nome = ''
                                 else:
-                                    nome = '- Nome: -'
+                                    nome = ''
                                 if rif_check == 1:
-                                    rif_leg = '- Riferimento legislativo: {}'.format(fl[rif_list[0]])
+                                    rif_leg = '{}'.format(fl[rif_list[0]])
                                     if fl[rif_list[0]] == NULL:
-                                        rif_leg = '- Riferimento legislativo: -'
+                                        rif_leg = ''
                                 else:
-                                    rif_leg = '- Riferimento legislativo: -'
+                                    rif_leg = ''
                                 if art_check == 1:
-                                    rif_nto = '- Articolo: {}'.format(fl[art_list[0]])
+                                    rif_nto = '{}'.format(fl[art_list[0]])
                                     if fl[art_list[0]] == NULL:
-                                        rif_nto = '- Articolo: -'
+                                        rif_nto = ''
                                 else:
-                                    rif_nto = '- Articolo: -'
+                                    rif_nto = ''
+                                if testo_check == 1:
+                                    art_txt = '{}'.format(fl[testo_list[0]])
+                                    if fl[testo_list[0]] == NULL:
+                                        art_txt = ''
+                                else:
+                                    art_txt = ''
                                 if area < 0.5:
-                                    area_tot = '- Area intersecata (m<sup>2</sup>): {}'.format(area)
+                                    area_tot = '{} m<sup>2</sup>'.format(area)
                                 else:
-                                    area_tot = '- Area intersecata (m<sup>2</sup>): {}'.format(round(area))
+                                    area_tot = '{} m<sup>2</sup>'.format(round(area))
                                 if area_perc < 0.5:
-                                    area_tot_perc = '- Area intersecata (%): {}'.format(round(area_perc, 3))
+                                    area_tot_perc = '{} %'.format(round(area_perc, 3))
                                 else:
-                                    area_tot_perc = '- Area intersecata (%): {}'.format(round(area_perc))
+                                    area_tot_perc = '{} %'.format(round(area_perc))
                                 if layers_dict[key][0]:
                                     sbgr_lyr = '{} - {}'.format(layers_dict[key][0], layers_dict[key][1])
                                 else:
                                     sbgr_lyr = '{}'.format(layers_dict[key][1])
-                                print_dict[unique_id] = (sbgr_lyr, nome, descr, rif_leg, rif_nto, area_tot, area_tot_perc)
+                                print_dict[unique_id] = (sbgr_lyr, nome, descr, rif_leg, rif_nto, art_txt, area_tot, area_tot_perc)
                                 if not stringa_cat in temp_dict.keys():
                                     temp_dict[stringa_cat] = print_dict
                                     check_double += 1
@@ -1312,21 +1358,21 @@ class CduCreator:
                             QCoreApplication.processEvents()
 
                     for key_td, value_td in temp_dict.items():
-                        #print('questa è la chiave: {}'.format(key_td))
+                        print('questa è la chiave: {}'.format(key_td))
                         print('questa è il valore: {}'.format(value_td))
                         text = ''
                         for ktd, vtd in value_td.items():
-                            print(ktd)
+                            articoli[vtd[4]] = vtd[5]
                             if self.checkAreaBox == True and self.checkAreaPercBox == True:
-                                text += '<p><b>' + vtd[0] + '</b><br>' + vtd[1] + '<br>' + vtd[2] + '<br>' + vtd[3] + '<br>' + vtd[4] + '<br>' + vtd[5] + '<br>' + vtd[6] +'<br><br></p>'
+                                text += '<b>, per ' + vtd[6] + ' (' + vtd[7] + ') circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
                             elif self.checkAreaBox == True and self.checkAreaPercBox == False:
-                                text += '<p><b>' + vtd[0] + '</b><br>' + vtd[1] + '<br>' + vtd[2] + '<br>' + vtd[3] + '<br>' + vtd[4] + '<br>' + vtd[5] + '<br><br></p>'
+                                text += '<b>, per ' + vtd[6] + ' circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
                             elif self.checkAreaBox == False and self.checkAreaPercBox == True:
-                                text += '<p><b>' + vtd[0] + '</b><br>' + vtd[1] + '<br>' + vtd[2] + '<br>' + vtd[3] + '<br>' + vtd[4] + '<br>' + vtd[6] + '<br><br></p>'
+                                text += '<b>, per il' + vtd[7] + ' circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
                             else:
-                                text += '<p><b>' + vtd[0] + '</b><br>' + vtd[1] + '<br>' + vtd[2] + '<br>' + vtd[3] + '<br>' + vtd[4] + '<br><br></p>'
+                                text += '<b>, ' + vtd[0] + ' "' +vtd[1] + ' ' + vtd[2] + '"</b>'
                         dict_to_print[key_td] = text
-                        
+                        print(articoli)
                 else:
                     if sel_sezione == 'NULL' or sel_sezione == '' or sel_sezione == '-' or sel_sezione == NULL:
                         self.dlg.textLog.append(self.tr('ATTENZIONE: il terreno identificato dal foglio {} e mappale {} non interseca alcun layer.\n'.format(sel_foglio, sel_particella)))
@@ -1338,7 +1384,7 @@ class CduCreator:
             self.lyr.removeSelection()
             print(fog_map_dict)
 
-            #crea la printer per stampare il pdf
+            """ #crea la printer per stampare il pdf
             printer = QPrinter()
             printer.setPageSize(QPrinter.A4)
             #printer.setPageMargins(10, 10, 10, 10, QPrinter.Millimeter)
@@ -1350,7 +1396,7 @@ class CduCreator:
                 cdu_pdf_name = '{}.pdf'.format(self.cdu_file_name)
             #print('il nome file è {}'.format(cdu_pdf_name))
             cdu_pdf_path = os.path.join(self.cdu_path_folder, cdu_pdf_name)
-            printer.setOutputFileName(cdu_pdf_path)
+            printer.setOutputFileName(cdu_pdf_path) """
 
             #compone l'html e stampa il pdf
             stringa = '<!DOCTYPE html><html><head><style>p {font-size: 13px;}</style></head><body>'
@@ -1399,11 +1445,24 @@ class CduCreator:
                     self.dlg.textLog.append(self.tr('ATTENZIONE: il file TXT {} non è stato trovato, il Testo non verrà stampato.\n'.format(self.input_txt_path)))
                     QCoreApplication.processEvents()
             stringa += '<h3 style="text-align:center">CERTIFICA CHE</h3>'
-            
-            
+            stringa += '<p>in virtù della Variante Generale al P.R.G. adottata con Delibera di Consiglio Comunale n. 49 del 05 giugno 2001 ed approvata con Delibera di Consiglio Regionale n. 179 del 07 settembre 2004,'
+            if self.input_txt_path2 != '':
+                if os.path.isfile(self.input_txt_path2):
+                    txt_file2 = open(self.input_txt_path2, "r")
+                    #print(file.read())
+                    for line2 in txt_file2:
+                        stringa += ' ' + line2 + ', '
+                    txt_file2.close()
+                else:
+                    self.dlg.textLog.append(self.tr('ATTENZIONE: il file TXT {} non è stato trovato, il Testo non verrà stampato.\n'.format(self.input_txt_path2)))
+                    QCoreApplication.processEvents()
+            stringa += 'le particelle in premessa spe­cificate sono così zonizzate:</p>'
+
             for key_dtp, value_dtp in dict_to_print.items():
-                stringa += key_dtp
-                stringa += value_dtp
+                print('final key {}'.format(key_dtp))
+                print('final value {}'.format(value_dtp))
+                stringa += '<div>' + key_dtp
+                stringa += value_dtp + '</div>'
                                    
 
             if self.checkMapBox == True:
@@ -1430,33 +1489,59 @@ class CduCreator:
                 render.start()
                 render.waitForFinished()
                 pdfPainter.setPen(QPen(QColor(51, 51, 51, 255), 2.0))
-                pdfPainter.drawRect(0,0,500,500);
+                pdfPainter.drawRect(0,0,500,500)
                 pdfPainter.end()
                 img_path_file = os.path.join(out_tempdir.name, 'map.png')
                 img.save(img_path_file)
                 
                 stringa += '<p style="text-align:center"><img src="' + img_path_file + '"></p>'
-            stringa += '<p style="text-align:center"> Il presente CDU è stato creato automaticamente in data {} alle ore {} utilizzando il plugin CDU Creator di QGIS.</p><br>'.format(datetime.now().strftime("%d-%m-%Y"), datetime.now().strftime("%H:%M:%S"))
-            stringa += '<p>Si rilascia la presente per gli usi consentiti dalla legge.</p><br><p style="text-align:right"> Il Responsabile del Servizio</p>'
+            
+            stringa += '<p>Sono riportate, di seguito, le relative norme urbanistiche.</p>'
+            stringa += '<p style="text-align:center">ESTRATTO DALLE NORME TECNICHE D\'ATTUAZIONE DELLA VARIANTE GENERALE AL P.R.G.:</p>'
+
+            for key_art, value_art in articoli.items():
+                stringa += value_art
+
+            stringa += '<p style="font-size:small"><b>ANNOTAZIONI:</b> la presente certificazione si limita alle sole prescrizioni di P.R.G., tralasciando l\'accertamento di eventuali ulteriori vincoli, di qualsiasi natura, gravanti sugli immobili oggetto di certificazione.  La superficie delle particelle ricadenti in più zone territoriali omogenee viene ripartita (per unità di superficie) ed indicata quantitativamente con l\'approssimazione normalmente tollerata per cartografie in scala 1:2000 e per deformazioni scaturite dalla fotoriproduzione della cartografia originale; la numerazione delle particelle è rilevata dalle mappe in possesso del Servizio Urbanistica, limitatamente al loro termine d\'aggiornamento, o da estratti di mappa di provata provenienza prodotti dal richiedente. Ogni indicazione riportata nella presente certificazione è conforme agli atti aggiornati dal Servizio Urbanistica.</p>'
+            #stringa += '<p style="text-align:center"> Il presente CDU è stato creato automaticamente in data {} alle ore {} utilizzando il plugin CDU Creator di QGIS.</p><br>'.format(datetime.now().strftime("%d-%m-%Y"), datetime.now().strftime("%H:%M:%S"))
+            stringa += '<p>Il presente è rila­sciato ai soli fini dell\'art. 30 del DPR n. 380/2001 - Testo Unico sull’Edilizia, in carta legale per gli usi consentiti.</p>'
+            stringa += '<p><b>Il Tecnico Istruttore<br><i>(' + self.CduTecnico + '___________________________)</i></b></p>'
+            stringa += '<p> Isernia, lì {}</p><br>'.format(datetime.now().strftime("%d-%m-%Y"))
+            stringa += '<p style="text-align:right"><b> IL DIRIGENTE III SETTORE<br><i>(' + self.CduDirigente + ')</i></b></p>'
             stringa += '</body></html>'
             doc = QTextDocument()
             doc.setHtml(stringa)
-            doc.print(printer)
-            self.dlg.textLog.append(self.tr('Il file PDF {} è stato salvato nella cartella {}.\n'.format(cdu_pdf_name, self.cdu_path_folder)))
+            #if self.checkOdtBox == True:
+            if self.cdu_file_name == '':
+                cdu_odt_name = '{}_f{}_prg2000.odt'.format(self.richiedente, '-'.join([f for f in sorted(set(fog_sel_list))]))
+            else:
+                cdu_odt_name = '{}.odt'.format(self.cdu_file_name)
+            #print('il nome file è {}'.format(cdu_pdf_name))
+            cdu_odt_path = os.path.join(self.cdu_path_folder, cdu_odt_name)
+            writer = QTextDocumentWriter()
+            #print(writer.supportedDocumentFormats())
+            writer.setFormat(QByteArray(b'ODF'))
+            writer.setFileName(cdu_odt_path)
+            writer.write(doc)
+            self.dlg.textLog.append(self.tr('Il file ODT {} è stato salvato nella cartella {}.\n'.format(cdu_odt_name, self.cdu_path_folder)))
             QCoreApplication.processEvents()
-            if self.checkOdtBox == True:
+
+            if self.checkPdfBox == True:
+                #crea la printer per stampare il pdf
+                printer = QPrinter()
+                printer.setPageSize(QPrinter.A4)
+                #printer.setPageMargins(10, 10, 10, 10, QPrinter.Millimeter)
+                printer.setFullPage(True)
+                printer.setOutputFormat(QPrinter.PdfFormat)
                 if self.cdu_file_name == '':
-                    cdu_odt_name = 'cdu_{}.odt'.format(datetime.now().strftime("%d%m%Y_%H%M%S"))
+                    cdu_pdf_name = '{}_f{}_prg2000.pdf'.format(self.richiedente, '-'.join([f for f in sorted(set(fog_sel_list))]))
                 else:
-                    cdu_odt_name = '{}.odt'.format(self.cdu_file_name)
+                    cdu_pdf_name = '{}.pdf'.format(self.cdu_file_name)
                 #print('il nome file è {}'.format(cdu_pdf_name))
-                cdu_odt_path = os.path.join(self.cdu_path_folder, cdu_odt_name)
-                writer = QTextDocumentWriter()
-                #print(writer.supportedDocumentFormats())
-                writer.setFormat(QByteArray(b'ODF'))
-                writer.setFileName(cdu_odt_path)
-                writer.write(doc)
-                self.dlg.textLog.append(self.tr('Il file ODT {} è stato salvato nella cartella {}.\n'.format(cdu_odt_name, self.cdu_path_folder)))
+                cdu_pdf_path = os.path.join(self.cdu_path_folder, cdu_pdf_name)
+                printer.setOutputFileName(cdu_pdf_path)
+                doc.print(printer)
+                self.dlg.textLog.append(self.tr('Il file PDF {} è stato salvato nella cartella {}.\n'.format(cdu_pdf_name, self.cdu_path_folder)))
                 QCoreApplication.processEvents()
                     
             self.dlg.textLog.append(self.tr('ATTENDERE...il processo terminerà a breve.\n'))
