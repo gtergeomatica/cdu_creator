@@ -1243,6 +1243,8 @@ class CduCreator:
                         art_list = []
                         testo_list = []
                         articoli = {}
+                        line_list = []
+                        line_info = {}
                         descr_check = 0
                         nome_check = 0
                         rif_check = 0
@@ -1274,6 +1276,7 @@ class CduCreator:
                                 unique_id = layers_dict[key][2] + '_' + str(fl.id())
                                 area = fl.geometry().area()
                                 area_perc = area * 100 / area_sel
+                                geom_type = fl.geometry().type()
                                 if descr_check == 1:
                                     descr = '{}'.format(fl[descr_list[0]])
                                     if fl[descr_list[0]] == NULL:
@@ -1316,7 +1319,7 @@ class CduCreator:
                                     sbgr_lyr = '{} - {}'.format(layers_dict[key][0], layers_dict[key][1])
                                 else:
                                     sbgr_lyr = '{}'.format(layers_dict[key][1])
-                                print_dict[unique_id] = (sbgr_lyr, nome, descr, rif_leg, rif_nto, art_txt, area_tot, area_tot_perc)
+                                print_dict[unique_id] = (sbgr_lyr, nome, descr, rif_leg, rif_nto, art_txt, area_tot, area_tot_perc, geom_type)
                                 if not stringa_cat in temp_dict.keys():
                                     temp_dict[stringa_cat] = print_dict
                                     check_double += 1
@@ -1361,18 +1364,28 @@ class CduCreator:
                         print('questa è la chiave: {}'.format(key_td))
                         print('questa è il valore: {}'.format(value_td))
                         text = ''
+                        text_line = ''
                         for ktd, vtd in value_td.items():
                             articoli[vtd[4]] = vtd[5]
-                            if self.checkAreaBox == True and self.checkAreaPercBox == True:
-                                text += '<b>, per ' + vtd[6] + ' (' + vtd[7] + ') circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
-                            elif self.checkAreaBox == True and self.checkAreaPercBox == False:
-                                text += '<b>, per ' + vtd[6] + ' circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
-                            elif self.checkAreaBox == False and self.checkAreaPercBox == True:
-                                text += '<b>, per il' + vtd[7] + ' circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
+                            if vtd[8] == 2:
+                                if self.checkAreaBox == True and self.checkAreaPercBox == True:
+                                    text += '<b>, per ' + vtd[6] + ' (' + vtd[7] + ') circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
+                                elif self.checkAreaBox == True and self.checkAreaPercBox == False:
+                                    text += '<b>, per ' + vtd[6] + ' circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
+                                elif self.checkAreaBox == False and self.checkAreaPercBox == True:
+                                    text += '<b>, per il' + vtd[7] + ' circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
+                                else:
+                                    text += '<b>, ' + vtd[0] + ' "' +vtd[1] + ' ' + vtd[2] + '"</b>'
                             else:
-                                text += '<b>, ' + vtd[0] + ' "' +vtd[1] + ' ' + vtd[2] + '"</b>'
+                                #line_info[vtd[2]] = key_td
+                                #text_line += vtd[2]
+                                line_list.append(vtd[2]) if vtd[2] not in line_list else line_list
+                                #text += '<b>, è parzialmente interessata da ' + vtd[0] + ' "' +vtd[1] + ' ' + vtd[2] + '"</b>'
                         dict_to_print[key_td] = text
+                        line_info[key_td] = line_list
                         print(articoli)
+                        print('questo è line_info {}'.format(line_info))
+                        print('questo è dict_to_print {}'.format(dict_to_print))
                 else:
                     if sel_sezione == 'NULL' or sel_sezione == '' or sel_sezione == '-' or sel_sezione == NULL:
                         self.dlg.textLog.append(self.tr('ATTENZIONE: il terreno identificato dal foglio {} e mappale {} non interseca alcun layer.\n'.format(sel_foglio, sel_particella)))
@@ -1496,6 +1509,12 @@ class CduCreator:
                 
                 stringa += '<p style="text-align:center"><img src="' + img_path_file + '"></p>'
             
+            if len(line_info) > 0:
+                stringa += '<p>NOTE:'
+                for key_line, value_line in line_info.items():
+                    stringa += ' la particella ' + key_line.replace('<br>', '') + ' è parzialmente interessata da ' + ', '.join(value_line)
+                stringa += '.</p>'
+
             stringa += '<p>Sono riportate, di seguito, le relative norme urbanistiche.</p>'
             stringa += '<p style="text-align:center">ESTRATTO DALLE NORME TECNICHE D\'ATTUAZIONE DELLA VARIANTE GENERALE AL P.R.G.:</p>'
 
