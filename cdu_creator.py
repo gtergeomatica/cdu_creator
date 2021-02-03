@@ -1380,9 +1380,10 @@ class CduCreator:
                                 #line_info[vtd[2]] = key_td
                                 #text_line += vtd[2]
                                 line_list.append(vtd[2]) if vtd[2] not in line_list else line_list
+                                line_info[key_td] = line_list
                                 #text += '<b>, è parzialmente interessata da ' + vtd[0] + ' "' +vtd[1] + ' ' + vtd[2] + '"</b>'
                         dict_to_print[key_td] = text
-                        line_info[key_td] = line_list
+                        #line_info[key_td] = line_list
                         print(articoli)
                         print('questo è line_info {}'.format(line_info))
                         print('questo è dict_to_print {}'.format(dict_to_print))
@@ -1412,7 +1413,7 @@ class CduCreator:
             printer.setOutputFileName(cdu_pdf_path) """
 
             #compone l'html e stampa il pdf
-            stringa = '<!DOCTYPE html><html><head><style>p {font-size: 13px;}</style></head><body>'
+            stringa = '<!DOCTYPE html><html><head><style>p {font-size: 13px; align: justify;}</style></head><body>'
             if self.input_logo_path != '':
                 if os.path.isfile(self.input_logo_path):
                     im = Image.open(self.input_logo_path)
@@ -1424,41 +1425,43 @@ class CduCreator:
                 else:
                     self.dlg.textLog.append(self.tr('ATTENZIONE: il file {} non è stato trovato, il Logo non verrà stampato.\n'.format(self.input_logo_path)))
                     QCoreApplication.processEvents()
-            stringa += '<h2 style="text-align:center"><i>COMUNE DI ' + self.CduComune + '</i></h2>'
-            stringa += '<h4 style="text-align:center"><i>(Medaglia d\'Oro)</i></h4>'
-            stringa += '<h3 style="text-align:center"><i><b>Settore III</i></h3>'
-            stringa += '<hr>'
-            stringa += '<p><i>Prot. n° ' + self.protocollo + '</i></p>'
-            stringa += '<p><i>8° Servizio Urbanistica</i></p>'
-            stringa += '<hr>'
-            stringa += '<p align="center"><b>' + self.CduTitle + '<br>(art. 30, comma 3, D.P.R.06/06/2001 n. 380 T.U. Edilizia)</b></p>'
-            stringa += '<p align="center"><i><b>Il Dirigente III Settore</b></i></p>'
-            stringa += '<p><b>VISTA</b> l\'istanza del/della sig./sig.ra <b>' + self.richiedente + ' </b>'
+            stringa += '<div style="text-align:center; font-size:20pt"><i><b>COMUNE DI ' + self.CduComune + '</b></i></div>'
+            stringa += '<div style="text-align:center; font-size:11pt"><i><b>(Medaglia d\'Oro)</b></i></div>'
+            stringa += '<div style="text-align:center; font-size:13pt"><i><b>Settore III</b></i></div>'
+            #stringa += '<hr>'
+            stringa += '<p style="font-size:12pt"><i>Prot. n° ' + self.protocollo + '</i><br>'
+            stringa += '<i>8° Servizio Urbanistica</i></p>'
+            #stringa += '<hr>'
+            stringa += '<p align="center" style="font-size:12pt"><b>' + self.CduTitle + '<br>(art. 30, comma 3, D.P.R.06/06/2001 n. 380 T.U. Edilizia)</b></p>'
+            stringa += '<p align="center" style="font-size:16pt"><i><b>Il Dirigente III Settore</b></i></p>'
+            stringa += '<p align="justify" style="font-size:12pt"><b>VISTA</b> l\'istanza del/della sig./sig.ra <b>' + self.richiedente + ' </b>'
             stringa += 'prot. n. <i>' + self.protocollo + '</i> '
             stringa += 'acquisito il <i>' + self.data.toString( Qt.DefaultLocaleShortDate) + '  </i>,'
             stringa +='tendente ad ottenere il rilascio di un certificato di destinazione urbanistica relativo ai terreni catastalmente individuati come segue:</p>'
+            #stringa += '<div style="font-size:12pt">'
             for kf, vm in fog_map_dict.items():
                 if len(vm) > 1:
-                    stringa += '<b>F. {}, P.lle {};</b><br>'.format(kf, '-'.join([v for v in vm]))
+                    stringa += '<div style="font-size:12pt"><b>F. {}, P.lle {};</b></div>'.format(kf, '-'.join([v for v in vm]))
                 else:
-                     stringa += '<b>F. {}, P.lla {};</b><br>'.format(kf, '-'.join([v for v in vm]))
-            stringa += '<p><b>FATTI ASSUMERE</b> i dovuti accertamenti dall’8° Servizio Urbanistica;<br><br>'
-            stringa += '<b>VISTI</b> gli elaborati della Variante Generale al P.R.G. adottati con Delibera di Consiglio Comunale n. 49 del 05 giugno 2001 ed approvata con Delibera di Consiglio Regionale n. 179 del 07 settembre 2004;<br><br>'
-            stringa += '<b>VISTI</b> gli atti del settore e le mappe in possesso dello stesso;<br><br>'
-            stringa += '<b>VISTO</b> l’art. 30 del DPR n. 380/2001 - Testo Unico sull’Edilizia;</p>'
+                     stringa += '<div style="font-size:12pt"><b>F. {}, P.lla {};</b></div>'.format(kf, '-'.join([v for v in vm]))
+            #stringa += '</div>'
+            stringa += '<p align="justify" style="font-size:12pt"><b>FATTI ASSUMERE</b> i dovuti accertamenti dall’8° Servizio Urbanistica;</p>'
+            stringa += '<p align="justify" style="font-size:12pt"><b>VISTI</b> gli elaborati della Variante Generale al P.R.G. adottati con Delibera di Consiglio Comunale n. 49 del 05 giugno 2001 ed approvata con Delibera di Consiglio Regionale n. 179 del 07 settembre 2004;</p>'
+            stringa += '<p align="justify" style="font-size:12pt"><b>VISTI</b> gli atti del settore e le mappe in possesso dello stesso;</p>'
+            stringa += '<p align="justify" style="font-size:12pt"><b>VISTO</b> l’art. 30 del DPR n. 380/2001 - Testo Unico sull’Edilizia;</p>'
 
             if self.input_txt_path != '':
                 if os.path.isfile(self.input_txt_path):
                     txt_file = open(self.input_txt_path, "r")
                     #print(file.read())
                     for line in txt_file:
-                        stringa += '<div style="font-size: 13px;">' + line + '</div>'
+                        stringa += '<div align="justify" style="font-size:12pt">' + line + '</div>'
                     txt_file.close()
                 else:
                     self.dlg.textLog.append(self.tr('ATTENZIONE: il file TXT {} non è stato trovato, il Testo non verrà stampato.\n'.format(self.input_txt_path)))
                     QCoreApplication.processEvents()
-            stringa += '<h3 style="text-align:center">CERTIFICA CHE</h3>'
-            stringa += '<p>in virtù della Variante Generale al P.R.G. adottata con Delibera di Consiglio Comunale n. 49 del 05 giugno 2001 ed approvata con Delibera di Consiglio Regionale n. 179 del 07 settembre 2004,'
+            stringa += '<p style="text-align:center; font-size:18pt">CERTIFICA CHE</p>'
+            stringa += '<p align="justify" style="font-size:12pt">in virtù della Variante Generale al P.R.G. adottata con Delibera di Consiglio Comunale n. 49 del 05 giugno 2001 ed approvata con Delibera di Consiglio Regionale n. 179 del 07 settembre 2004,'
             if self.input_txt_path2 != '':
                 if os.path.isfile(self.input_txt_path2):
                     txt_file2 = open(self.input_txt_path2, "r")
@@ -1474,7 +1477,7 @@ class CduCreator:
             for key_dtp, value_dtp in dict_to_print.items():
                 print('final key {}'.format(key_dtp))
                 print('final value {}'.format(value_dtp))
-                stringa += '<div>' + key_dtp
+                stringa += '<div align="justify" style="font-size:12pt">' + key_dtp
                 stringa += value_dtp + '</div>'
                                    
 
@@ -1509,26 +1512,28 @@ class CduCreator:
                 
                 stringa += '<p style="text-align:center"><img src="' + img_path_file + '"></p>'
             
-            if len(line_info) > 0:
-                stringa += '<p>NOTE:'
+            if len(line_list) > 0:
+                print('line è {}'.format(line_info))
+                stringa += '<p align="justify" style="font-size:12pt">NOTE:'
                 for key_line, value_line in line_info.items():
                     stringa += ' la particella ' + key_line.replace('<br>', '') + ' è parzialmente interessata da ' + ', '.join(value_line)
                 stringa += '.</p>'
 
-            stringa += '<p>Sono riportate, di seguito, le relative norme urbanistiche.</p>'
-            stringa += '<p style="text-align:center">ESTRATTO DALLE NORME TECNICHE D\'ATTUAZIONE DELLA VARIANTE GENERALE AL P.R.G.:</p>'
+            stringa += '<p style="font-size:12pt">Sono riportate, di seguito, le relative norme urbanistiche.</p>'
+            stringa += '<p style="text-align:center; font-size:12pt">ESTRATTO DALLE NORME TECNICHE D\'ATTUAZIONE DELLA VARIANTE GENERALE AL P.R.G.:</p>'
 
             for key_art, value_art in articoli.items():
                 stringa += value_art
 
-            stringa += '<p style="font-size:small"><b>ANNOTAZIONI:</b> la presente certificazione si limita alle sole prescrizioni di P.R.G., tralasciando l\'accertamento di eventuali ulteriori vincoli, di qualsiasi natura, gravanti sugli immobili oggetto di certificazione.  La superficie delle particelle ricadenti in più zone territoriali omogenee viene ripartita (per unità di superficie) ed indicata quantitativamente con l\'approssimazione normalmente tollerata per cartografie in scala 1:2000 e per deformazioni scaturite dalla fotoriproduzione della cartografia originale; la numerazione delle particelle è rilevata dalle mappe in possesso del Servizio Urbanistica, limitatamente al loro termine d\'aggiornamento, o da estratti di mappa di provata provenienza prodotti dal richiedente. Ogni indicazione riportata nella presente certificazione è conforme agli atti aggiornati dal Servizio Urbanistica.</p>'
+            stringa += '<p style="font-size:10pt" align="justify"><b>ANNOTAZIONI:</b> la presente certificazione si limita alle sole prescrizioni di P.R.G., tralasciando l\'accertamento di eventuali ulteriori vincoli, di qualsiasi natura, gravanti sugli immobili oggetto di certificazione.  La superficie delle particelle ricadenti in più zone territoriali omogenee viene ripartita (per unità di superficie) ed indicata quantitativamente con l\'approssimazione normalmente tollerata per cartografie in scala 1:2000 e per deformazioni scaturite dalla fotoriproduzione della cartografia originale; la numerazione delle particelle è rilevata dalle mappe in possesso del Servizio Urbanistica, limitatamente al loro termine d\'aggiornamento, o da estratti di mappa di provata provenienza prodotti dal richiedente. Ogni indicazione riportata nella presente certificazione è conforme agli atti aggiornati dal Servizio Urbanistica.</p>'
             #stringa += '<p style="text-align:center"> Il presente CDU è stato creato automaticamente in data {} alle ore {} utilizzando il plugin CDU Creator di QGIS.</p><br>'.format(datetime.now().strftime("%d-%m-%Y"), datetime.now().strftime("%H:%M:%S"))
-            stringa += '<p>Il presente è rila­sciato ai soli fini dell\'art. 30 del DPR n. 380/2001 - Testo Unico sull’Edilizia, in carta legale per gli usi consentiti.</p>'
-            stringa += '<p><b>Il Tecnico Istruttore<br><i>(' + self.CduTecnico + '___________________________)</i></b></p>'
-            stringa += '<p> Isernia, lì {}</p><br>'.format(datetime.now().strftime("%d-%m-%Y"))
-            stringa += '<p style="text-align:right"><b> IL DIRIGENTE III SETTORE<br><i>(' + self.CduDirigente + ')</i></b></p>'
+            stringa += '<p align="justify" style="font-size:12pt">Il presente è rila­sciato ai soli fini dell\'art. 30 del DPR n. 380/2001 - Testo Unico sull’Edilizia, in carta legale per gli usi consentiti.</p>'
+            stringa += '<p style="font-size:10pt"><b>Il Tecnico Istruttore<br><i>(' + self.CduTecnico + '___________________________)</i></b></p>'
+            stringa += '<p style="font-size:12pt"> Isernia, lì {}</p><br>'.format(datetime.now().strftime("%d-%m-%Y"))
+            stringa += '<p style="text-align:right; font-size:12pt"><b> IL DIRIGENTE III SETTORE<br><i>(' + self.CduDirigente + ')</i></b></p>'
             stringa += '</body></html>'
             doc = QTextDocument()
+            #doc.setDefaultStyleSheet("p { font-size:12pt; }")
             doc.setHtml(stringa)
             #if self.checkOdtBox == True:
             if self.cdu_file_name == '':
