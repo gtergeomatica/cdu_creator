@@ -307,8 +307,8 @@ class CduCreator:
                 self.dlg.helpButton.clicked.connect(self.openHelpButton)
                 self.dlg.foglioComboBox.currentIndexChanged.connect(self.foglioBox)
                 self.dlg.foglioComboBox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-                self.dlg.sezioneComboBox.currentIndexChanged.connect(self.sezioneBox)
-                self.dlg.sezioneComboBox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+                #self.dlg.sezioneComboBox.currentIndexChanged.connect(self.sezioneBox)
+                #self.dlg.sezioneComboBox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
                 self.dlg.particellaComboBox.currentIndexChanged.connect(self.particellaBox)
                 self.dlg.particellaComboBox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
                 self.dlg.fileImportButton.clicked.connect(self.importFile)
@@ -382,7 +382,7 @@ class CduCreator:
         self.sezioneIndex = idxs
         self.check_f = 0
         self.check_m = 0
-        self.check_s = 0
+        #self.check_s = 0
         self.catasto_alias = self.lyr.attributeAliases()
         if self.catasto_alias == {}:
             fi = 0
@@ -391,9 +391,9 @@ class CduCreator:
                 fi += 1
             self.catasto_alias = self.lyr.attributeAliases()
         for key_c, values_c in self.catasto_alias.items():
-            if values_c.casefold() == 'SEZIONE'.casefold() or key_c.casefold() == 'SEZIONE'.casefold():
+            """ if values_c.casefold() == 'SEZIONE'.casefold() or key_c.casefold() == 'SEZIONE'.casefold():
                 self.sez_list.insert(0, key_c)
-                self.check_s += 1
+                self.check_s += 1 """
             if values_c.casefold() == 'FOGLIO'.casefold() or key_c.casefold() == 'FOGLIO'.casefold():
                 self.fog_list.insert(0, key_c)
                 self.check_f += 1
@@ -401,10 +401,10 @@ class CduCreator:
                 self.map_list.insert(0, key_c)
                 self.check_m += 1
 
-        if self.check_s == 0:
+        """ if self.check_s == 0:
             self.dlg.sezioneComboBox.setEnabled(False)
             self.dlg.textLog.append(self.tr('INFO: una colonna con nome o alias = sezione non è stata trovata, il menù a tendina Sezione è stato disabilitato.\n'))
-            QCoreApplication.processEvents()
+            QCoreApplication.processEvents() """
         if self.check_f == 0:
             self.dlg.textLog.append(self.tr('ERRORE: una colonna con nome o alias = foglio non è stata trovata\n'))
             return
@@ -919,7 +919,7 @@ class CduCreator:
         self.dlg.clearSelButton.clicked.disconnect(self.clearSelButton)
         self.dlg.helpButton.clicked.disconnect(self.openHelpButton)
         self.dlg.foglioComboBox.currentIndexChanged.disconnect(self.foglioBox)
-        self.dlg.sezioneComboBox.currentIndexChanged.disconnect(self.sezioneBox)
+        #self.dlg.sezioneComboBox.currentIndexChanged.disconnect(self.sezioneBox)
         self.dlg.particellaComboBox.currentIndexChanged.disconnect(self.particellaBox)
         self.dlg.fileImportButton.clicked.disconnect(self.importFile)
         self.dlg.gruppoComboBox.currentIndexChanged.disconnect(self.gruppoBox)
@@ -1204,25 +1204,46 @@ class CduCreator:
                     check_double = 0
                     for key, value in layers_dict.items():
                         file_name = 'intersect_{}_{}.gpkg'.format(shp_count, vl.name())
-                        try:
-                            if selectedAlgoIndex == 0:
+                        if selectedAlgoIndex == 0:
+                            try:
                                 processing.run("native:clip", {'INPUT': key,
                                     'OVERLAY': vl,
                                     'OUTPUT': '{}/{}'.format(out_tempdir.name, file_name)})
-                            else:
+                            except:
+                                try:
+                                    processing.run("gdal:clipvectorbypolygon", {'INPUT': key,
+                                        'MASK': vl,
+                                        'OUTPUT': '{}/{}'.format(out_tempdir.name, file_name)})
+                                except:
+                                    self.dlg.textLog.append(self.tr('ATTENZIONE: sono stati riscontrati problemi nell\'intersezione fra la particella selezionata e il layer {}. Il CDU non verrà creato.\n'.format(layers_dict[key][1])))
+                                    QCoreApplication.processEvents()
+                                    rm_group = self.root.findGroup('temp')
+                                    if rm_group is not None:
+                                        for child in rm_group.children():
+                                            QgsProject.instance().removeMapLayer(child.layerId())
+                                        self.root.removeChildNode(rm_group)
+                                    map.refresh()
+                                    return
+                        else:
+                            try:
                                 processing.run("gdal:clipvectorbypolygon", {'INPUT': key,
-                                    'MASK': vl,
+                                        'MASK': vl,
+                                        'OUTPUT': '{}/{}'.format(out_tempdir.name, file_name)})
+                            except:
+                                try:
+                                    processing.run("native:clip", {'INPUT': key,
+                                    'OVERLAY': vl,
                                     'OUTPUT': '{}/{}'.format(out_tempdir.name, file_name)})
-                        except:
-                            self.dlg.textLog.append(self.tr('ATTENZIONE: sono stati riscontrati problemi nell\'intersezione fra la particella selezionata e il layer {}. Il CDU non verrà creato.\n'.format(layers_dict[key][1])))
-                            QCoreApplication.processEvents()
-                            rm_group = self.root.findGroup('temp')
-                            if rm_group is not None:
-                                for child in rm_group.children():
-                                    QgsProject.instance().removeMapLayer(child.layerId())
-                                self.root.removeChildNode(rm_group)
-                            map.refresh()
-                            return
+                                except:
+                                    self.dlg.textLog.append(self.tr('ATTENZIONE: sono stati riscontrati problemi nell\'intersezione fra la particella selezionata e il layer {}. Il CDU non verrà creato.\n'.format(layers_dict[key][1])))
+                                    QCoreApplication.processEvents()
+                                    rm_group = self.root.findGroup('temp')
+                                    if rm_group is not None:
+                                        for child in rm_group.children():
+                                            QgsProject.instance().removeMapLayer(child.layerId())
+                                        self.root.removeChildNode(rm_group)
+                                    map.refresh()
+                                    return
 
                         int_lyr_pathfile = os.path.join(out_tempdir.name, file_name)
                         int_lyr_name = file_name.split('.')
@@ -1436,7 +1457,7 @@ class CduCreator:
             stringa += '<p align="center" style="font-size:16pt"><i><b>Il Dirigente III Settore</b></i></p>'
             stringa += '<p align="justify" style="font-size:12pt"><b>VISTA</b> l\'istanza del/della sig./sig.ra <b>' + self.richiedente + ' </b>'
             stringa += 'prot. n. <i>' + self.protocollo + '</i> '
-            stringa += 'acquisito il <i>' + self.data.toString( Qt.DefaultLocaleShortDate) + '  </i>,'
+            stringa += 'acquisito il <i>' + self.data.toString( Qt.DefaultLocaleShortDate) + ' </i>,'
             stringa +='tendente ad ottenere il rilascio di un certificato di destinazione urbanistica relativo ai terreni catastalmente individuati come segue:</p>'
             #stringa += '<div style="font-size:12pt">'
             for kf, vm in fog_map_dict.items():
