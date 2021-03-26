@@ -82,7 +82,7 @@ class CduCreator:
         
         self.pluginIsActive = False
         
-        #self.aoiIndex = -1
+        
         self.foglioIndex = 0
         self.show_values = []
         self.sezioneIndex = 0
@@ -100,6 +100,7 @@ class CduCreator:
         self.algo_names = []
         self.cdu_path_folder = ''
         self.CduTitle = 'Certificato di Destinazione Urbanistica (CDU)'
+        self.VisuraTitle = 'Visura'
         self.CduComune = 'ISERNIA'
         self.CduTecnico = ''
         self.CduDirigente = ''
@@ -120,7 +121,11 @@ class CduCreator:
         self.map_list = []
         self.catasto_alias = {}
         self.checkPdfBox = False
-        self.checkMapBox = False 
+        self.checkMapBox = False
+        self.checkVisura = True
+        self.checkCdu = False
+        self.bollo = ''
+
         
 
     # noinspection PyMethodMayBeStatic
@@ -299,7 +304,8 @@ class CduCreator:
 
             if QgsProject.instance().mapLayersByName('terreni_catastali'):
                 self.lyr = QgsProject.instance().mapLayersByName('terreni_catastali')[0]
-                        
+                
+                self.dlg.sezioneComboBox.setVisible(False)
                 self.dlg.OutFolderButton.clicked.connect(self.exportCduButton)
                 self.dlg.OutFolder.textChanged.connect(self.handleOutFolder)
                 self.dlg.clearButton.clicked.connect(self.clearButton)
@@ -307,7 +313,7 @@ class CduCreator:
                 self.dlg.helpButton.clicked.connect(self.openHelpButton)
                 self.dlg.foglioComboBox.currentIndexChanged.connect(self.foglioBox)
                 self.dlg.foglioComboBox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-                #self.dlg.sezioneComboBox.currentIndexChanged.connect(self.sezioneBox)
+                self.dlg.sezioneComboBox.currentIndexChanged.connect(self.sezioneBox)
                 #self.dlg.sezioneComboBox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
                 self.dlg.particellaComboBox.currentIndexChanged.connect(self.particellaBox)
                 self.dlg.particellaComboBox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
@@ -328,6 +334,9 @@ class CduCreator:
                 self.dlg.nameLineEdit.textChanged.connect(self.handleFileName)
                 self.dlg.protocolloLineEdit.textChanged.connect(self.handleProtocollo)
                 self.dlg.richiedenteEdit.textChanged.connect(self.handleRichiedente)
+                self.dlg.visuraButton.toggled.connect(self.handleVisura)
+                self.dlg.cduButton.toggled.connect(self.handleCDU)
+                self.dlg.bolloEdit.textChanged.connect(self.handleBollo)
                 #self.dlg.DataCheckBox.stateChanged.connect(self.handleDataCheck)
                 self.dlg.dateEdit.setDate(QDate.currentDate())
                 #self.dlg.printAreaBox.setText("m<sup>2</sup>")
@@ -382,7 +391,7 @@ class CduCreator:
         self.sezioneIndex = idxs
         self.check_f = 0
         self.check_m = 0
-        #self.check_s = 0
+        self.check_s = 0
         self.catasto_alias = self.lyr.attributeAliases()
         if self.catasto_alias == {}:
             fi = 0
@@ -391,9 +400,9 @@ class CduCreator:
                 fi += 1
             self.catasto_alias = self.lyr.attributeAliases()
         for key_c, values_c in self.catasto_alias.items():
-            """ if values_c.casefold() == 'SEZIONE'.casefold() or key_c.casefold() == 'SEZIONE'.casefold():
+            if values_c.casefold() == 'SEZIONE'.casefold() or key_c.casefold() == 'SEZIONE'.casefold():
                 self.sez_list.insert(0, key_c)
-                self.check_s += 1 """
+                self.check_s += 1
             if values_c.casefold() == 'FOGLIO'.casefold() or key_c.casefold() == 'FOGLIO'.casefold():
                 self.fog_list.insert(0, key_c)
                 self.check_f += 1
@@ -401,10 +410,10 @@ class CduCreator:
                 self.map_list.insert(0, key_c)
                 self.check_m += 1
 
-        """ if self.check_s == 0:
+        if self.check_s == 0:
             self.dlg.sezioneComboBox.setEnabled(False)
-            self.dlg.textLog.append(self.tr('INFO: una colonna con nome o alias = sezione non è stata trovata, il menù a tendina Sezione è stato disabilitato.\n'))
-            QCoreApplication.processEvents() """
+            #self.dlg.textLog.append(self.tr('INFO: una colonna con nome o alias = sezione non è stata trovata, il menù a tendina Sezione è stato disabilitato.\n'))
+            #QCoreApplication.processEvents()
         if self.check_f == 0:
             self.dlg.textLog.append(self.tr('ERRORE: una colonna con nome o alias = foglio non è stata trovata\n'))
             return
@@ -658,7 +667,7 @@ class CduCreator:
                 #sel_foglio = selectedF[self.fog_list[0].casefold()]
                 #sel_particella = selectedF[self.map_list[0].casefold()]
                 testo = self.tr('Fog = {}, Map = {} '.format(sel_foglio, sel_particella))
-            print(self.dlg.textParticelle.toPlainText())
+            #print(self.dlg.textParticelle.toPlainText())
             lines = self.dlg.textParticelle.toPlainText().split("\n")
             #print(lines)
             #print(testo)
@@ -708,14 +717,36 @@ class CduCreator:
     def algoritmoBox(self, idxa):
         #print('gruppo')
         self.algoritmoIndex = idxa
-        print(self.algoritmoIndex)
+        #print(self.algoritmoIndex)
         
     def handleProtocollo(self, val):
         self.protocollo = val
         
     def handleRichiedente(self, val):
         self.richiedente = val
-        
+
+    def handleVisura(self):
+        if self.dlg.visuraButton.isChecked() == True:
+            self.checkVisura = True
+        else:
+            self.checkVisura = False
+        #print('visura è {}'.format(self.checkVisura))
+
+    def handleCDU(self):
+        if self.dlg.cduButton.isChecked() == True:
+            self.checkCdu = True
+            self.dlg.label_7.setEnabled(True)
+            self.dlg.bolloEdit.setEnabled(True)
+        else:
+            self.checkCdu = False
+            self.dlg.label_7.setEnabled(False)
+            self.dlg.bolloEdit.setEnabled(False)
+        #print('cdu è {}'.format(self.checkCdu))
+
+    def handleBollo(self, val):
+        self.bollo = val
+        #print(self.bollo)
+
     """ def handleDataCheck(self):
         if self.dlg.DataCheckBox.isChecked() == True:
             self.checkDataBox = True
@@ -739,7 +770,7 @@ class CduCreator:
         self.cdu_out_folder = QFileDialog.getExistingDirectory()
         self.cdu_path_folder = QDir.toNativeSeparators(self.cdu_out_folder)
         #print (self.cdu_out_folder)
-        print (self.cdu_path_folder)
+        #print (self.cdu_path_folder)
         cdu_txt_folder = self.dlg.OutFolder.setText(self.cdu_path_folder)
         
     def handleOutFolder(self, val):
@@ -849,11 +880,11 @@ class CduCreator:
         
     def handleTxt(self, val):
         self.input_txt_path = val
-        print(self.input_txt_path)
+        #print(self.input_txt_path)
 
     def handleTxt2(self, val):
         self.input_txt_path2 = val
-        print(self.input_txt_path2)
+        #print(self.input_txt_path2)
 
     def handleAreaBox(self):
         if self.dlg.printAreaBox.isChecked() == True:
@@ -919,7 +950,7 @@ class CduCreator:
         self.dlg.clearSelButton.clicked.disconnect(self.clearSelButton)
         self.dlg.helpButton.clicked.disconnect(self.openHelpButton)
         self.dlg.foglioComboBox.currentIndexChanged.disconnect(self.foglioBox)
-        #self.dlg.sezioneComboBox.currentIndexChanged.disconnect(self.sezioneBox)
+        self.dlg.sezioneComboBox.currentIndexChanged.disconnect(self.sezioneBox)
         self.dlg.particellaComboBox.currentIndexChanged.disconnect(self.particellaBox)
         self.dlg.fileImportButton.clicked.disconnect(self.importFile)
         self.dlg.gruppoComboBox.currentIndexChanged.disconnect(self.gruppoBox)
@@ -938,6 +969,9 @@ class CduCreator:
         self.dlg.nameLineEdit.textChanged.disconnect(self.handleFileName)
         self.dlg.protocolloLineEdit.textChanged.disconnect(self.handleProtocollo)
         self.dlg.richiedenteEdit.textChanged.disconnect(self.handleRichiedente)
+        self.dlg.visuraButton.toggled.disconnect(self.handleVisura)
+        self.dlg.cduButton.toggled.disconnect(self.handleCDU)
+        self.dlg.bolloEdit.textChanged.disconnect(self.handleBollo)
         #self.dlg.DataCheckBox.stateChanged.disconnect(self.handleDataCheck)
         self.dlg.textParticelle.textChanged.disconnect(self.handleRemoveButton)
         self.dlg.dateEdit.dateChanged.connect(self.handleData)
@@ -990,7 +1024,10 @@ class CduCreator:
         self.map_list = []
         self.catasto_alias = {}
         self.checkPdfBox = False
-        self.checkMapBox = False 
+        self.checkMapBox = False
+        self.checkVisura = True
+        self.checkCdu = False
+        self.bollo = ''
         
         if self.out_tempdir_s != '':
             self.out_tempdir_s.cleanup()
@@ -1016,6 +1053,10 @@ class CduCreator:
 
         if self.richiedente == '':
             self.dlg.textLog.append(self.tr('ERRORE: non è stato specificato il nome del richiedente\n'))
+            return
+
+        if self.checkCdu == True and self.bollo == '':
+            self.dlg.textLog.append(self.tr('ERRORE: non è stato specificato il numero identificativo del bollo\n'))
             return
             
         if self.cdu_path_folder == '':
@@ -1289,7 +1330,7 @@ class CduCreator:
                                 testo_check += 1
 
                         sel_lyr_int = QgsProject.instance().mapLayersByName(layers_dict[key][2])
-                        print('testo exist {}'.format(testo_check))
+                        #print('testo exist {}'.format(testo_check))
                         for fl in sel_lyr_int[0].getFeatures():
                             if sel_lyr_int[0].featureCount() > 0:
                                 #print('ci sono features')
@@ -1382,8 +1423,8 @@ class CduCreator:
                             QCoreApplication.processEvents()
 
                     for key_td, value_td in temp_dict.items():
-                        print('questa è la chiave: {}'.format(key_td))
-                        print('questa è il valore: {}'.format(value_td))
+                        #print('questa è la chiave: {}'.format(key_td))
+                        #print('questa è il valore: {}'.format(value_td))
                         text = ''
                         text_line = ''
                         for ktd, vtd in value_td.items():
@@ -1405,9 +1446,9 @@ class CduCreator:
                                 #text += '<b>, è parzialmente interessata da ' + vtd[0] + ' "' +vtd[1] + ' ' + vtd[2] + '"</b>'
                         dict_to_print[key_td] = text
                         #line_info[key_td] = line_list
-                        print(articoli)
-                        print('questo è line_info {}'.format(line_info))
-                        print('questo è dict_to_print {}'.format(dict_to_print))
+                        #print(articoli)
+                        #print('questo è line_info {}'.format(line_info))
+                        #print('questo è dict_to_print {}'.format(dict_to_print))
                 else:
                     if sel_sezione == 'NULL' or sel_sezione == '' or sel_sezione == '-' or sel_sezione == NULL:
                         self.dlg.textLog.append(self.tr('ATTENZIONE: il terreno identificato dal foglio {} e mappale {} non interseca alcun layer.\n'.format(sel_foglio, sel_particella)))
@@ -1417,7 +1458,7 @@ class CduCreator:
                         QCoreApplication.processEvents()
             
             self.lyr.removeSelection()
-            print(fog_map_dict)
+            #print(fog_map_dict)
 
             """ #crea la printer per stampare il pdf
             printer = QPrinter()
@@ -1446,14 +1487,22 @@ class CduCreator:
                 else:
                     self.dlg.textLog.append(self.tr('ATTENZIONE: il file {} non è stato trovato, il Logo non verrà stampato.\n'.format(self.input_logo_path)))
                     QCoreApplication.processEvents()
+            #stringa += '<table margin-left="100px" cellpadding="5" cellspacing="0" border=1 bordercolor="#000000">'
+            #stringa += '<tr><td valign="top" align="center" ><p align="center">' + self.bollo + '<br/></p></td></tr></table>'       
             stringa += '<div style="text-align:center; font-size:20pt"><i><b>COMUNE DI ' + self.CduComune + '</b></i></div>'
             stringa += '<div style="text-align:center; font-size:11pt"><i><b>(Medaglia d\'Oro)</b></i></div>'
             stringa += '<div style="text-align:center; font-size:13pt"><i><b>Settore III</b></i></div>'
             #stringa += '<hr>'
             stringa += '<p style="font-size:12pt"><i>Prot. n° ' + self.protocollo + '</i><br>'
-            stringa += '<i>8° Servizio Urbanistica</i></p>'
+            stringa += '<i>8° Servizio Urbanistica</i>'
             #stringa += '<hr>'
-            stringa += '<p align="center" style="font-size:12pt"><b>' + self.CduTitle + '<br>(art. 30, comma 3, D.P.R.06/06/2001 n. 380 T.U. Edilizia)</b></p>'
+            if self.checkCdu == True:
+                title = self.CduTitle
+                stringa += '<br><i>Marca da bollo: ' + self.bollo + '</i></p>'
+            else:
+                title = self.VisuraTitle
+                stringa += '</p>'
+            stringa += '<p align="center" style="font-size:12pt"><b>' + title + '<br>(art. 30, comma 3, D.P.R.06/06/2001 n. 380 T.U. Edilizia)</b></p>'
             stringa += '<p align="center" style="font-size:16pt"><i><b>Il Dirigente III Settore</b></i></p>'
             stringa += '<p align="justify" style="font-size:12pt"><b>VISTA</b> l\'istanza del/della sig./sig.ra <b>' + self.richiedente + ' </b>'
             stringa += 'prot. n. <i>' + self.protocollo + '</i> '
@@ -1496,8 +1545,8 @@ class CduCreator:
             stringa += 'le particelle in premessa spe­cificate sono così zonizzate:</p>'
 
             for key_dtp, value_dtp in dict_to_print.items():
-                print('final key {}'.format(key_dtp))
-                print('final value {}'.format(value_dtp))
+                #print('final key {}'.format(key_dtp))
+                #print('final value {}'.format(value_dtp))
                 stringa += '<div align="justify" style="font-size:12pt">' + key_dtp
                 stringa += value_dtp + '</div>'
                                    
@@ -1534,7 +1583,7 @@ class CduCreator:
                 stringa += '<p style="text-align:center"><img src="' + img_path_file + '"></p>'
             
             if len(line_list) > 0:
-                print('line è {}'.format(line_info))
+                #print('line è {}'.format(line_info))
                 stringa += '<p align="justify" style="font-size:12pt">NOTE:'
                 for key_line, value_line in line_info.items():
                     stringa += ' la particella ' + key_line.replace('<br>', '') + ' è parzialmente interessata da ' + ', '.join(value_line)
@@ -1599,7 +1648,7 @@ class CduCreator:
                         self.lyr.selectByExpression("{}='{}' AND {}='{}' AND {}='{}'".format(self.sez_list[0].casefold(), sfm, self.fog_list[0].casefold(), fog_sel_list[k], self.map_list[0].casefold(), map_sel_list[k]), 1)
                 else:
                     if sfm == 'NULL' or sfm == '' or sfm == NULL:
-                        print('sez null')
+                        #print('sez null')
                         self.lyr.selectByExpression("{}='{}' AND {}='{}'".format(self.fog_list[0].casefold(), fog_sel_list[k], self.map_list[0].casefold(), map_sel_list[k]), 1)
                     else:
                         #print('sez not null')
