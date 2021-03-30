@@ -369,6 +369,7 @@ class CduCreator:
                         else:
                             self.dlg.textParticelle.append(self.tr('Fog = {}, Map = {} \n'.format(sel_foglio, sel_particella)))
                     #self.dlg.removeButton.setEnabled(True)
+                    #iface.actionZoomToSelected().trigger()
                     box = self.lyr.boundingBoxOfSelected()
                     map = iface.mapCanvas()
                     map.setExtent(box)
@@ -1178,7 +1179,7 @@ class CduCreator:
                 fog_map_dict.setdefault(sel_foglio, []).append(sel_particella) 
                 #print('il mappale è {}'.format(sel_particella))
                 if sel_sezione == NULL or sel_sezione == '' or sel_sezione == '-' or sel_sezione == 'NULL':
-                    stringa_cat = '<br><b> F. ' + sel_foglio + ', P.lla' + sel_particella + '</b>'
+                    stringa_cat = '<br><b> F. ' + sel_foglio + ', P.lla ' + sel_particella + '</b>'
                 else:
                     stringa_cat = '<br><b> S. ' + sel_sezione + ', F. ' + sel_foglio + ', P.lla ' + sel_particella + '</b>'
 
