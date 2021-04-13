@@ -1550,7 +1550,19 @@ class CduCreator:
                 #print('final value {}'.format(value_dtp))
                 stringa += '<div align="justify" style="font-size:12pt">' + key_dtp
                 stringa += value_dtp + '</div>'
-                                   
+            
+            if len(line_list) > 0:
+                #print('line è {}'.format(line_info))
+                stringa += '<p align="justify" style="font-size:12pt">NOTE:'
+                for key_line, value_line in line_info.items():
+                    stringa += ' la particella ' + key_line.replace('<br>', '') + ' è parzialmente interessata da ' + ', '.join(value_line)
+                stringa += '.</p>'
+
+            stringa += '<p style="font-size:12pt">Sono riportate, di seguito, le relative norme urbanistiche.</p>'
+            stringa += '<p style="text-align:center; font-size:12pt">ESTRATTO DALLE NORME TECNICHE D\'ATTUAZIONE DELLA VARIANTE GENERALE AL P.R.G.:</p>'
+
+            for key_art, value_art in articoli.items():
+                stringa += value_art
 
             if self.checkMapBox == True:
                 #crea immagine della mappa centrata sull'area di interesse
@@ -1582,19 +1594,6 @@ class CduCreator:
                 img.save(img_path_file)
                 
                 stringa += '<p style="text-align:center"><img src="' + img_path_file + '"></p>'
-            
-            if len(line_list) > 0:
-                #print('line è {}'.format(line_info))
-                stringa += '<p align="justify" style="font-size:12pt">NOTE:'
-                for key_line, value_line in line_info.items():
-                    stringa += ' la particella ' + key_line.replace('<br>', '') + ' è parzialmente interessata da ' + ', '.join(value_line)
-                stringa += '.</p>'
-
-            stringa += '<p style="font-size:12pt">Sono riportate, di seguito, le relative norme urbanistiche.</p>'
-            stringa += '<p style="text-align:center; font-size:12pt">ESTRATTO DALLE NORME TECNICHE D\'ATTUAZIONE DELLA VARIANTE GENERALE AL P.R.G.:</p>'
-
-            for key_art, value_art in articoli.items():
-                stringa += value_art
 
             stringa += '<p style="font-size:10pt" align="justify"><b>ANNOTAZIONI:</b> la presente certificazione si limita alle sole prescrizioni di P.R.G., tralasciando l\'accertamento di eventuali ulteriori vincoli, di qualsiasi natura, gravanti sugli immobili oggetto di certificazione.  La superficie delle particelle ricadenti in più zone territoriali omogenee viene ripartita (per unità di superficie) ed indicata quantitativamente con l\'approssimazione normalmente tollerata per cartografie in scala 1:2000 e per deformazioni scaturite dalla fotoriproduzione della cartografia originale; la numerazione delle particelle è rilevata dalle mappe in possesso del Servizio Urbanistica, limitatamente al loro termine d\'aggiornamento, o da estratti di mappa di provata provenienza prodotti dal richiedente. Ogni indicazione riportata nella presente certificazione è conforme agli atti aggiornati dal Servizio Urbanistica.</p>'
             #stringa += '<p style="text-align:center"> Il presente CDU è stato creato automaticamente in data {} alle ore {} utilizzando il plugin CDU Creator di QGIS.</p><br>'.format(datetime.now().strftime("%d-%m-%Y"), datetime.now().strftime("%H:%M:%S"))
