@@ -92,7 +92,7 @@ class CduCreator:
         self.foglio_values = []
         self.sezione_values = []
         self.gruppoIndex = 0
-        self.gruppoParamIndex = ''
+        self.gruppoParamIndex = '0'
         self.algoritmoIndex = 0
         self.out_tempdir_s = ''
         self.lyr = ''
@@ -924,12 +924,12 @@ class CduCreator:
                 self.group_names.append(ch.name())
                 
         self.dlg.gruppoComboBox.clear()
-        print('in preprun groupindex = {}'.format(self.gruppoIndex))
-        self.dlg.gruppoComboBox.addItem('')
+        #print('in preprun groupindex = {}'.format(self.gruppoIndex))
+        #self.dlg.gruppoComboBox.addItem('')
         self.dlg.gruppoComboBox.addItems(gro for gro in self.group_names)
-        print('in preprun groupindex = {}'.format(self.gruppoIndex))
+        #print('in preprun groupindex = {}'.format(self.gruppoIndex))
         self.dlg.gruppoComboBox.setCurrentIndex(int(self.gruppoParamIndex))
-        print('in preprun groupindex = {}'.format(self.gruppoIndex))
+        #print('in preprun groupindex = {}'.format(self.gruppoIndex))
         
         
         self.algo_names = ['QGIS - Ritaglia', 'GDAL - Ritaglia con maschera']
@@ -997,7 +997,7 @@ class CduCreator:
         self.foglio_values = []
         self.sezione_values = []
         self.gruppoIndex = 0
-        self.gruppoParamIndex = ''
+        self.gruppoParamIndex = '0'
         self.algoritmoIndex = 0
         self.out_tempdir_s = ''
         self.lyr = ''
@@ -1044,9 +1044,9 @@ class CduCreator:
         #print(self.sezioneIndex)
         self.dlg.tabWidget.setCurrentIndex(2)
         
-        if self.gruppoIndex == 0:
+        """ if self.gruppoIndex == 0:
             self.dlg.textLog.append(self.tr('ATTENZIONE: nessun gruppo è stato selezionato, selezionare il gruppo contenete i dati urbanistici\n'))
-            return
+            return """
 
         if self.protocollo == '':
             self.dlg.textLog.append(self.tr('ERRORE: non è stato specificato il numero di protocollo\n'))
@@ -1106,7 +1106,9 @@ class CduCreator:
                         
             selectedGroupIndex = self.dlg.gruppoComboBox.currentIndex()
             #print (selectedGroupIndex)
-            selectedGroup = self.group_names[selectedGroupIndex - 1]
+            #il -1 serve se aggiungo un elemento vuoto al menù
+            #selectedGroup = self.group_names[selectedGroupIndex - 1]
+            selectedGroup = self.group_names[selectedGroupIndex]
             #print (selectedGroup)
             
             selectedAlgoIndex = self.dlg.algoComboBox.currentIndex()
