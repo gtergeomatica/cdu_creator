@@ -1609,9 +1609,9 @@ class CduCreator:
             doc.setHtml(stringa)
             #if self.checkOdtBox == True:
             if self.cdu_file_name == '':
-                cdu_odt_name = '{}_f{}_prg2000.odt'.format(self.richiedente, '-'.join([f for f in sorted(set(fog_sel_list))]))
+                cdu_odt_name = '{}_f{}_prg2000.doc'.format(self.richiedente, '-'.join([f for f in sorted(set(fog_sel_list))]))
             else:
-                cdu_odt_name = '{}.odt'.format(self.cdu_file_name)
+                cdu_odt_name = '{}.doc'.format(self.cdu_file_name)
             #print('il nome file è {}'.format(cdu_pdf_name))
             cdu_odt_path = os.path.join(self.cdu_path_folder, cdu_odt_name)
             writer = QTextDocumentWriter()
@@ -1619,7 +1619,7 @@ class CduCreator:
             writer.setFormat(QByteArray(b'ODF'))
             writer.setFileName(cdu_odt_path)
             writer.write(doc)
-            self.dlg.textLog.append(self.tr('Il file ODT {} è stato salvato nella cartella {}.\n'.format(cdu_odt_name, self.cdu_path_folder)))
+            self.dlg.textLog.append(self.tr('Il file DOC {} è stato salvato nella cartella {}.\n'.format(cdu_odt_name, self.cdu_path_folder)))
             QCoreApplication.processEvents()
 
             if self.checkPdfBox == True:
