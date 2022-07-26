@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+"""
 /***************************************************************************
  CduCreator
                                  A QGIS plugin
@@ -1381,7 +1381,8 @@ class CduCreator:
                                 else:
                                     area_tot = '{} m<sup>2</sup>'.format(round(area))
                                 if area_perc < 0.5:
-                                    area_tot_perc = '{} %'.format(round(area_perc, 3))
+                                    area_tot_perc = ''
+                                    # area_tot_perc = '{} %'.format(round(area_perc, 3))
                                 else:
                                     area_tot_perc = '{} %'.format(round(area_perc))
                                 if layers_dict[key][0]:
@@ -1435,19 +1436,25 @@ class CduCreator:
                         text = ''
                         text_line = ''
                         for ktd, vtd in value_td.items():
-                            articoli[vtd[4]] = vtd[5]
-                            if vtd[8] == 2:
-                                if self.checkAreaBox == True and self.checkAreaPercBox == True:
-                                    text += '<b>, per ' + vtd[6] + ' (' + vtd[7] + ') circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
-                                elif self.checkAreaBox == True and self.checkAreaPercBox == False:
-                                    text += '<b>, per ' + vtd[6] + ' circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
-                                elif self.checkAreaBox == False and self.checkAreaPercBox == True:
-                                    text += '<b>, per il' + vtd[7] + ' circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
-                                else:
+                            # articoli[vtd[4]] = vtd[5]
+                            if vtd[8] == 2: #se si tratta di un poligono viene printata l'area
+                                if vtd[7] != '' and vtd[7] != '100 %': #se la particella interseca in minima parte una zona (< 0.5%) e non ricoade interamente in una sola zona l'area viene printata
+                                    articoli[vtd[4]] = vtd[5]
+                                    if self.checkAreaBox == True and self.checkAreaPercBox == True:
+                                        text += '<b>, per ' + vtd[6] + ' (' + vtd[7] + ') circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
+                                    elif self.checkAreaBox == True and self.checkAreaPercBox == False:
+                                        text += '<b>, per ' + vtd[6] + ' circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
+                                    elif self.checkAreaBox == False and self.checkAreaPercBox == True:
+                                        text += '<b>, per il' + vtd[7] + ' circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
+                                    else:
+                                        text += '<b>, ' + vtd[0] + ' "' +vtd[1] + ' ' + vtd[2] + '"</b>'
+                                elif vtd[7] == '100 %': #se la particella ricade interamente in una zona l'area non viene printata
+                                    articoli[vtd[4]] = vtd[5]
                                     text += '<b>, ' + vtd[0] + ' "' +vtd[1] + ' ' + vtd[2] + '"</b>'
                             else:
                                 #line_info[vtd[2]] = key_td
                                 #text_line += vtd[2]
+                                articoli[vtd[4]] = vtd[5]
                                 line_list.append(vtd[2]) if vtd[2] not in line_list else line_list
                                 line_info[key_td] = line_list
                                 #text += '<b>, è parzialmente interessata da ' + vtd[0] + ' "' +vtd[1] + ' ' + vtd[2] + '"</b>'
@@ -1603,7 +1610,7 @@ class CduCreator:
 
             stringa += '<p style="font-size:10pt" align="justify"><b>ANNOTAZIONI:</b> la presente certificazione si limita alle sole prescrizioni di P.R.G., tralasciando l\'accertamento di eventuali ulteriori vincoli, di qualsiasi natura, gravanti sugli immobili oggetto di certificazione.  La superficie delle particelle ricadenti in più zone territoriali omogenee viene ripartita (per unità di superficie) ed indicata quantitativamente con l\'approssimazione normalmente tollerata per cartografie in scala 1:2000 e per deformazioni scaturite dalla fotoriproduzione della cartografia originale; la numerazione delle particelle è rilevata dalle mappe in possesso del Servizio Urbanistica, limitatamente al loro termine d\'aggiornamento, o da estratti di mappa di provata provenienza prodotti dal richiedente. Ogni indicazione riportata nella presente certificazione è conforme agli atti aggiornati dal Servizio Urbanistica.</p>'
             #stringa += '<p style="text-align:center"> Il presente CDU è stato creato automaticamente in data {} alle ore {} utilizzando il plugin CDU Creator di QGIS.</p><br>'.format(datetime.now().strftime("%d-%m-%Y"), datetime.now().strftime("%H:%M:%S"))
-            stringa += '<p align="justify" style="font-size:12pt">Il presente è rila­sciato ai soli fini dell\'art. 30 del DPR n. 380/2001 - Testo Unico sull’Edilizia, in carta legale per gli usi consentiti.</p>'
+            stringa += '<p align="justify" style="font-size:12pt">Il presente è rilasciato ai soli fini dell\'art. 30 del DPR n. 380/2001 - Testo Unico sull’Edilizia, in carta legale per gli usi consentiti.</p>'
             stringa += '<p style="font-size:10pt"><b>Il Tecnico Istruttore<br><i>(' + self.CduTecnico + '___________________________)</i></b></p>'
             stringa += '<p style="font-size:12pt"> Isernia, lì {}</p><br>'.format(datetime.now().strftime("%d-%m-%Y"))
             stringa += '<p style="text-align:right; font-size:12pt"><b> IL DIRIGENTE III SETTORE<br><i>(' + self.CduDirigente + ')</i></b></p>'
