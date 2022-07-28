@@ -1337,9 +1337,18 @@ class CduCreator:
                                 testo_check += 1
 
                         sel_lyr_int = QgsProject.instance().mapLayersByName(layers_dict[key][2])
-                        #print('testo exist {}'.format(testo_check))
-                        for fl in sel_lyr_int[0].getFeatures():
-                            if sel_lyr_int[0].featureCount() > 0:
+                        feat_area = {}
+                        if sel_lyr_int[0].featureCount() > 0: #verifico che abbia delle features
+                            #creo un dict delle feature intersecate in ordine crescente per area così nel cdu vengono printate in ordine
+                            for fa in sel_lyr_int[0].getFeatures():
+                                farea = fa.geometry().area()
+                                feat_area[fa] = round(farea)
+
+                            sort_orders = sorted(feat_area.items(), key=lambda x: x[1], reverse=False)
+                            sortdict = dict(sort_orders)
+                            #print('testo exist {}'.format(testo_check))
+                            for fl in sortdict:
+                                #if sel_lyr_int[0].featureCount() > 0:
                                 #print('ci sono features')
                                 #print('il num di feat è: {}'.format(sel_lyr_int[0].featureCount()))
                                 unique_id = layers_dict[key][2] + '_' + str(fl.id())
@@ -1377,12 +1386,13 @@ class CduCreator:
                                 else:
                                     art_txt = ''
                                 if area < 0.5:
-                                    area_tot = '{} m<sup>2</sup>'.format(area)
+                                    area_tot = ''
+                                    # area_tot = '{} m<sup>2</sup>'.format(area)
                                 else:
                                     area_tot = '{} m<sup>2</sup>'.format(round(area))
                                 if area_perc < 0.5:
-                                    area_tot_perc = ''
-                                    # area_tot_perc = '{} %'.format(round(area_perc, 3))
+                                    #area_tot_perc = ''
+                                    area_tot_perc = '{} %'.format(round(area_perc, 3))
                                 else:
                                     area_tot_perc = '{} %'.format(round(area_perc))
                                 if layers_dict[key][0]:
@@ -1417,9 +1427,23 @@ class CduCreator:
                         if sel_sezione == 'NULL' or sel_sezione == '' or sel_sezione == '-' or sel_sezione == NULL:
                             self.dlg.textLog.append(self.tr('ATTENZIONE: il terreno identificato dal foglio {} e mappale {} non interseca alcun layer.\n'.format(sel_foglio, sel_particella)))
                             QCoreApplication.processEvents()
+                            rm_group = self.root.findGroup('temp')
+                            if rm_group is not None:
+                                for child in rm_group.children():
+                                    QgsProject.instance().removeMapLayer(child.layerId())
+                                self.root.removeChildNode(rm_group)
+                            map.refresh()
+                            return
                         else:
                             self.dlg.textLog.append(self.tr('ATTENZIONE: il terreno identificato dalla sezione {}, foglio {} e mappale {} non interseca alcun layer.\n'.format(sel_sezione, sel_foglio, sel_particella)))
                             QCoreApplication.processEvents()
+                            rm_group = self.root.findGroup('temp')
+                            if rm_group is not None:
+                                for child in rm_group.children():
+                                    QgsProject.instance().removeMapLayer(child.layerId())
+                                self.root.removeChildNode(rm_group)
+                            map.refresh()
+                            return
                             
                     #check su eventuali particelle con setesso valore per sezione, foglio e mappale
                     if check_double == 0:
@@ -1438,7 +1462,7 @@ class CduCreator:
                         for ktd, vtd in value_td.items():
                             # articoli[vtd[4]] = vtd[5]
                             if vtd[8] == 2: #se si tratta di un poligono viene printata l'area
-                                if vtd[7] != '' and vtd[7] != '100 %': #se la particella interseca in minima parte una zona (< 0.5%) e non ricoade interamente in una sola zona l'area viene printata
+                                if vtd[6] != '' and vtd[7] != '100 %': #se la particella interseca in minima parte una zona (< 0.5 mq) e non ricoade interamente in una sola zona l'area viene printata
                                     articoli[vtd[4]] = vtd[5]
                                     if self.checkAreaBox == True and self.checkAreaPercBox == True:
                                         text += '<b>, per ' + vtd[6] + ' (' + vtd[7] + ') circa ricade in ' + vtd[0] + ' "' + vtd[1] + ' ' + vtd[2] + '"</b>'
@@ -1467,9 +1491,23 @@ class CduCreator:
                     if sel_sezione == 'NULL' or sel_sezione == '' or sel_sezione == '-' or sel_sezione == NULL:
                         self.dlg.textLog.append(self.tr('ATTENZIONE: il terreno identificato dal foglio {} e mappale {} non interseca alcun layer.\n'.format(sel_foglio, sel_particella)))
                         QCoreApplication.processEvents()
+                        rm_group = self.root.findGroup('temp')
+                        if rm_group is not None:
+                            for child in rm_group.children():
+                                QgsProject.instance().removeMapLayer(child.layerId())
+                            self.root.removeChildNode(rm_group)
+                        map.refresh()
+                        return
                     else:
                         self.dlg.textLog.append(self.tr('ATTENZIONE: il terreno identificato dalla sezione {}, foglio {} e mappale {} non interseca alcun layer.\n'.format(sel_sezione, sel_foglio, sel_particella)))
                         QCoreApplication.processEvents()
+                        rm_group = self.root.findGroup('temp')
+                        if rm_group is not None:
+                            for child in rm_group.children():
+                                QgsProject.instance().removeMapLayer(child.layerId())
+                            self.root.removeChildNode(rm_group)
+                        map.refresh()
+                        return
             
             self.lyr.removeSelection()
             #print(fog_map_dict)
